@@ -49,19 +49,20 @@ func (l Limits) SaveToApp(appName string) error {
 
 
 // Returns formatted docker arguments
-func (l Limits) DockerOptions(procName string) ([]string, error) {
+// TODO: Move this to the resourses type
+func (l Limits) DockerOptions(procName string) ([]string) {
 	args := make([]string, len(l))
 
 	limits, ok := l[procName]
 	if !ok {
-		return nil, nil
+		return nil
 	}
 
 	for typ, limit := range limits {
 		args = append(args, FormatLimitDocker(typ, limit))
 	}
 
-	return args, nil
+	return args
 }
 
 

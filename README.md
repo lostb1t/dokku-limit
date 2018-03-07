@@ -15,7 +15,7 @@ Currently supports settings limit's for memory usage and CPU usage.
 sudo dokku plugin:install https://github.com/sarendsen/dokku-limit.git limit
 ```
 
-## commands
+## Commands
 
 ```
 limit (<app> <proc>), Pretty-print resource limits
@@ -23,13 +23,14 @@ limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more 
 ```
 
 
-## resources
+## Resources
 
 memory
 cpu
 
 
-## examples
+## Usage
 
 ```
+dokku limit:set my_app web cpu=50 memory=500m
 ```
