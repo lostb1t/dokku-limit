@@ -28,6 +28,6 @@ func main() {
 
 	args := limits.DockerOptions(procName)
 	if args != nil {
-		fmt.Printf("%s", strings.Join(args, " "))
+		fmt.Printf(" %s", strings.Join(args, " "))
 	}
 }

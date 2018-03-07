@@ -32,7 +32,7 @@ The maximum amount of memory the container can use. example: "500m"
 cpu
 
 The maximum amount of CPU resources the container can use. example: "50"
-This guarantees the container at most uses 50% of the CPU every second.
+This guarantees the container at most uses 50% of avaiable CPU every second.
 
 
 ## Usage
