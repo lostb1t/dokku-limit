@@ -4,16 +4,24 @@ import (
 	"os"
 	"fmt"
 	"strings"
-	//limit "github.com/sarendsen/dokku-limit/pkg/limit"
 	resource "github.com/sarendsen/dokku-limit/pkg/resource"
 )
 
 func main() {
-	// $APP $IMAGE_TAG [$PROC_TYPE $CONTAINER_INDEX]
+	// $CALLER $APP $IMAGE_TAG [$PROC_TYPE $CONTAINER_INDEX]
+	// Seems some calls don't include the proctype
+	if len(os.Args) < 4 {
+		return
+	}
+
 	appName := os.Args[1]
-	procName := os.Args[2]
+	procName := os.Args[3]
 
 	limits := resource.LoadForApp(appName)
+	if limits == nil {
+		return
+	}
+
 	if limits[procName] == nil {
 		return
 	}

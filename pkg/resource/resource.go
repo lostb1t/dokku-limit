@@ -82,8 +82,8 @@ func FormatLimitDocker(typ Type, limit string) string {
 	case TypeCPU:
 		numCPU := runtime.NumCPU()
 		limit, _ := strconv.Atoi(limit)
-		cpus := (numCPU / 100 * limit)
-		return fmt.Sprintf("--cpus=%s", string(cpus))
+		cpus := (float32(numCPU) / float32(100) * float32(limit))
+		return fmt.Sprintf("--cpus=\"%.2g\"", cpus)
 	}
 	return ""	
 }

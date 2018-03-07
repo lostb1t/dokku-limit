@@ -46,6 +46,8 @@ func CommandSet(args []string, noRestart bool) error {
 
 	limits.SaveToApp(appName)
 
+	// todo print new limits
+
 	if !noRestart {
 		if !common.IsDeployed(appName) {
 			common.LogFail("App has not been deployed, cannot restart.")
