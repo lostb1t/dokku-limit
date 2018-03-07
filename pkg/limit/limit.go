@@ -15,6 +15,9 @@ func CommandSet(args []string, noRestart bool) error {
 	if len(args) == 1 {
 		common.LogFail("Please specify an process")
 	}
+	if len(args) == 2 {
+		common.LogFail("Please specify at least 1 limit")
+	}
 	appName := args[0]
 	procName := args[1]
 	verifyAppName(appName)
@@ -23,7 +26,7 @@ func CommandSet(args []string, noRestart bool) error {
 	// Check if process exists.
 	app_processes := resource.GetAppProcs(appName)
 	if !app_processes[procName] {
-		common.LogWarn(fmt.Sprintf("WARNING: Process %s does not exists, setting anyway.", procName))
+		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
 	}
     
     // Load current resource limits or initiate new.
@@ -45,7 +48,7 @@ func CommandSet(args []string, noRestart bool) error {
 
 	if !noRestart {
 		if !common.IsDeployed(appName) {
-			common.LogFail("App has not been deployed")
+			common.LogFail("App has not been deployed, cannot restart.")
 		}
 		triggerRestart(appName)
 	}

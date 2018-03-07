@@ -173,9 +173,10 @@ func LoadForApp(appName string) Limits {
 func GetAppProcs(appName string) map[string]bool {
 	appRoot := AppRoot(appName)
 	filePath := strings.Join([]string{appRoot, "DOKKU_SCALE"}, "/")
+	procs := make(map[string]bool)
 
 	if !common.FileExists(filePath) {
-		common.LogFail("Cannot get DOKKU_SCALE FILE")
+		return procs
 	}
 
 	lines, err := common.FileToSlice(filePath)
@@ -183,7 +184,6 @@ func GetAppProcs(appName string) map[string]bool {
         common.LogFail(err.Error())
     }
 
-    procs := make(map[string]bool)
     for _, line := range lines {
     	procs[strings.Split(line, "=")[0]] = true 
     }

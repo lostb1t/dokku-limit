@@ -1,7 +1,7 @@
 # dokku limit (beta)
 App resource management plugin for dokku.
 
-Currently supports settings limit's for memory usage and CPU usage.
+Currently supports setting limit's for memory usage and CPU usage per process type.
 
 ## requirements
 
@@ -18,7 +18,7 @@ sudo dokku plugin:install https://github.com/sarendsen/dokku-limit.git limit
 ## Commands
 
 ```
-limit (<app> <proc>), Pretty-print resource limits
+limit (<app>), Pretty-print resource limits
 limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
 ```
 
@@ -26,7 +26,13 @@ limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more 
 ## Resources
 
 memory
+
+The maximum amount of memory the container can use. example: "500m"
+
 cpu
+
+The maximum amount of CPU resources the container can use. example: "50"
+This guarantees the container at most uses 50% of the CPU every second.
 
 
 ## Usage
