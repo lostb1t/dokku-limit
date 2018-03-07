@@ -32,11 +32,19 @@ The maximum amount of memory the container can use. example: "500m"
 cpu
 
 The maximum amount of CPU resources the container can use. example: "50"
-This guarantees the container at most uses 50% of avaiable CPU every second.
+
+This guarantees the container uses at most 50% of CPU every second.
 
 
 ## Usage
 
 ```
+# Set cpu to 50% and memory to 500 MB for process "web"
 dokku limit:set my_app web cpu=50 memory=500m
+
+# Show all resource limits
+dokku limit
+
+# Show resource limits for app "my_app"
+dokku limit my_app
 ```

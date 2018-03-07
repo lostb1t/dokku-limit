@@ -77,6 +77,7 @@ func CommandReport(args []string) {
 		fmt.Print("No limits set")
 	}
 
+	// todo: better looking formatting
 	for appName, limits := range apps {
 		for procName, resources := range limits {
 			fmt.Printf("=====%s=====\n", appName)

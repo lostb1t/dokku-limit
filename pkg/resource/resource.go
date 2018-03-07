@@ -26,7 +26,7 @@ const (
 var defaults = Resources{}
 
 
-type Resources map[Type]string 
+type Resources map[Type]int64
 
 
 func Defaults() Resources {
@@ -49,7 +49,7 @@ func (l Limits) SaveToApp(appName string) error {
 
 
 // Returns formatted docker arguments
-// TODO: Move this to the resourses type
+// TODO: Move this to the resources type
 func (l Limits) DockerOptions(procName string) ([]string) {
 	args := make([]string, len(l))
 
@@ -66,26 +66,28 @@ func (l Limits) DockerOptions(procName string) ([]string) {
 }
 
 
-func FormatLimit(typ Type, limit string) string {
+func FormatLimit(typ Type, limit int64) string {
 	switch typ {
+	case TypeMemory:
+		return units.BytesSize(float64(limit))
 	case TypeCPU:
-		return fmt.Sprintf("%s%%", limit)
+		return fmt.Sprintf("%d%%", limit)
+	default:
+		return strconv.FormatInt(limit, 10)
 	}
-	return limit
 }
 
 
-func FormatLimitDocker(typ Type, limit string) string {
+func FormatLimitDocker(typ Type, limit int64) string {
 	switch typ {
 	case TypeMemory:
-		return fmt.Sprintf("--memory=%s", limit)
+		return fmt.Sprintf("--memory=%d", limit)
 	case TypeCPU:
 		numCPU := runtime.NumCPU()
-		limit, _ := strconv.Atoi(limit)
-		cpus := (float32(numCPU) / float32(100) * float32(limit))
+		cpus := (float64(numCPU) / float64(100) * float64(limit))
 		return fmt.Sprintf("--cpus=\"%.2g\"", cpus)
 	}
-	return ""	
+	return ""
 }
 
 
@@ -102,7 +104,6 @@ func ToType(s string) (Type, bool) {
 
 
 func Parse(limits []string) (Resources) {
-	//resources := make(Resources, len(limits))
 	resources := Resources{}
 	for _, limit := range limits {
 		typVal := strings.SplitN(limit, "=", 2)
@@ -123,16 +124,18 @@ func Parse(limits []string) (Resources) {
 }
 
 
-func ParseLimit(typ Type, s string) (string, error) {
+func ParseLimit(typ Type, s string) (int64, error) {
 	switch typ {
+	case TypeMemory:
+		return units.RAMInBytes(s)
 	case TypeCPU:
 		val, err := units.FromHumanSize(s)
 		if (val > 100 || val <= 0) {
-			return "", fmt.Errorf("Invalid CPU value, should be between 1 - 100")
+			return -1, fmt.Errorf("Invalid CPU value, should be between 1 - 100")
 		}
-		return s, err
+		return val, err
 	default:
-		return s, nil
+		return units.FromHumanSize(s)
 	}
 }
 
