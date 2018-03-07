@@ -1,7 +1,7 @@
 # dokku limit (beta)
 App resource management plugin for dokku.
 
-Currently supports setting limit's for memory usage and CPU usage per process type.
+Currently supports setting limit's for memory and CPU per process type.
 
 ## requirements
 
@@ -27,13 +27,13 @@ limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more 
 
 memory
 
-The maximum amount of memory the container can use. example: "500m"
+The maximum amount of memory the process can use. example: "500m"
 
 cpu
 
-The maximum amount of CPU resources the container can use. example: "50"
+The maximum amount of CPU resources the process can use. example: "50"
 
-This guarantees the container uses at most 50% of CPU every second.
+This guarantees the process uses at most 50% of CPU every second.
 
 
 ## Usage
