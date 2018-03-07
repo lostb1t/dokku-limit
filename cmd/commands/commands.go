@@ -32,6 +32,8 @@ func main() {
 		args := flag.NewFlagSet("limit:report", flag.ExitOnError)
 		args.Parse(os.Args[2:])
 		limit.CommandReport(args.Args())
+	case "help":
+		fmt.Print("\n    limit, App resource management.\n")
 	case "limit:help":
 		usage()
 	default:
