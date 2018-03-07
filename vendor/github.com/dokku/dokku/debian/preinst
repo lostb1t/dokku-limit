@@ -1,0 +1,57 @@
+#!/bin/bash
+set -eo pipefail; [[ $TRACE ]] && set -x
+
+if [[ -e /usr/share/debconf/confmodule ]]; then
+  # shellcheck disable=SC1091
+  . /usr/share/debconf/confmodule
+fi
+
+case "$1" in
+  install)
+    db_get "dokku/web_config"
+    if [ "$RET" = "true" ]; then
+      NGINX_CONF="/etc/nginx/conf.d/dokku-installer.conf"
+
+      rm -f $NGINX_CONF
+      touch $NGINX_CONF
+
+      {
+        echo 'upstream dokku-installer { server 127.0.0.1:2000; }'
+        echo 'server {'
+        echo '  listen      80;'
+        echo '  location    / {'
+        echo '    proxy_pass  http://dokku-installer;'
+        echo '  }'
+        echo '}'
+      } >> $NGINX_CONF
+
+      rm -f /etc/nginx/sites-enabled/*
+      service nginx reload || /etc/init.d/nginx reload
+      exit 0
+    fi
+
+    db_get "dokku/skip_key_file"
+    if [ -z "${DEBCONF_RECONFIGURE}" ] && [ "$RET" != "true" ]; then
+      db_get "dokku/key_file"
+      if [ ! -f "$RET" ]; then
+          echo "Error: keyfile '$RET' not found."
+          echo "       you can enter a new keyfile path when you restart the installation."
+          db_reset "dokku/key_file"
+          exit 1
+      fi
+    fi
+    ;;
+
+  upgrade)
+    ;;
+
+  abort-upgrade)
+    ;;
+
+  *)
+    echo "preinst called with unknown argument \`$1'" >&2
+    exit 1
+    ;;
+esac
+
+exit 0

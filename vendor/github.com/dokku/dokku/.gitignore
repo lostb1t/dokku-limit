@@ -1,0 +1,11 @@
+*.deb
+*.rpm
+.DS_Store
+.ruby-version
+.idea/
+.vagrant
+data/
+stack.tgz
+tmp
+coverage.out
+contrib/dokku-update-version

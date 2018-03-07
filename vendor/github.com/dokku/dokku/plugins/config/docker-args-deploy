@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+source "$PLUGIN_AVAILABLE_PATH/config/functions"
+
+config_docker_args() {
+  declare desc="config docker-args plugin trigger"
+  declare APP="$1" IMAGE_TAG="$2"
+  local ENV_ARGS IMAGE STDIN trigger
+
+  IMAGE=$(get_deploying_app_image_name "$APP" "$IMAGE_TAG")
+  STDIN=$(cat);
+  trigger="$0 config_docker_args"
+  verify_app_name "$APP"
+
+  if ! is_image_herokuish_based "$IMAGE"; then
+    ENV_ARGS="$(config_export app "$APP" --format docker-args --merged)"
+    echo -n "$STDIN $ENV_ARGS"
+  else
+    echo -n "$STDIN"
+  fi
+}
+
+config_docker_args "$@"

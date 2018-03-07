@@ -1,0 +1,34 @@
+{
+  "redirects": {
+    "installation": "getting-started/advanced-installation/",
+    "advanced-installation": "getting-started/advanced-installation/",
+    "troubleshooting": "getting-started/troubleshooting/",
+    "upgrading": "getting-started/upgrading/",
+
+    "application-deployment": "deployment/application-deployment/",
+    "checks-examples": "deployment/zero-downtime-deploys/",
+    "process-management": "deployment/process-management/",
+    "remote-commands": "deployment/remote-commands/",
+
+    "deployment/buildpacks": "deployment/methods/buildpacks/",
+    "deployment/dockerfiles": "deployment/methods/dockerfiles/",
+    "deployment/images": "deployment/methods/images/",
+    "configuration-management": "configuration/environment-variables/",
+    "deployment/ssl-configuration": "configuration/ssl/",
+    "nginx": "configuration/nginx/",
+
+    "dns": "networking/dns/",
+    "configuration/dns": "networking/dns/",
+    "proxy": "networking/proxy-management/",
+    "advanced-usage/proxy-management": "networking/proxy-management/",
+
+    "backup-recovery": "advanced-usage/backup-recovery/",
+    "deployment-tasks": "advanced-usage/deployment-tasks/",
+    "deployment/deployment-tasks": "advanced-usage/deployment-tasks/",
+    "docker-options": "advanced-usage/docker-options/",
+    "dokku-events-logs": "advanced-usage/event-logs/",
+    "dokku-storage": "advanced-usage/persistent-storage/",
+
+    "plugins": "community/plugins/"
+  }
+}

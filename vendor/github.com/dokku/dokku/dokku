@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+set -eo pipefail
+shopt -s nullglob
+
+export DOKKU_ROOT=${DOKKU_ROOT:=~dokku}
+if [[ -f "$DOKKU_ROOT/dokkurc" ]]; then
+  if [[ -r $DOKKU_ROOT/dokkurc ]]; then
+    source "$DOKKU_ROOT/dokkurc"
+  else
+    echo "Unable to read $DOKKU_ROOT/dokkurc for sourcing" 1>&2
+    exit 1
+  fi
+fi
+if [[ -d $DOKKU_ROOT/.dokkurc ]]; then
+  for f in $DOKKU_ROOT/.dokkurc/*; do
+    if [[ -r "$f" ]]; then
+      source "$f"
+    else
+      echo "Unable to read $f for sourcing" 1>&2
+      exit 1
+    fi
+  done
+fi
+[[ $DOKKU_TRACE ]] && set -x
+
+export DOKKU_DISTRO
+# shellcheck disable=SC1091
+DOKKU_DISTRO=$(. /etc/os-release > /dev/null 2>&1 || true ; echo "$ID")
+
+export DOKKU_IMAGE=${DOKKU_IMAGE:="gliderlabs/herokuish"}
+export DOKKU_LIB_ROOT=${DOKKU_LIB_PATH:="/var/lib/dokku"}
+
+export PLUGIN_PATH=${PLUGIN_PATH:="$DOKKU_LIB_ROOT/plugins"}
+export PLUGIN_AVAILABLE_PATH=${PLUGIN_AVAILABLE_PATH:="$PLUGIN_PATH/available"}
+export PLUGIN_ENABLED_PATH=${PLUGIN_ENABLED_PATH:="$PLUGIN_PATH/enabled"}
+export PLUGIN_CORE_PATH=${PLUGIN_CORE_PATH:="$DOKKU_LIB_ROOT/core-plugins"}
+export PLUGIN_CORE_AVAILABLE_PATH=${PLUGIN_CORE_AVAILABLE_PATH:="$PLUGIN_CORE_PATH/available"}
+export PLUGIN_CORE_ENABLED_PATH=${PLUGIN_CORE_ENABLED_PATH:="$PLUGIN_CORE_PATH/enabled"}
+
+export DOKKU_API_VERSION=1
+export DOKKU_NOT_IMPLEMENTED_EXIT=10
+export DOKKU_VALID_EXIT=0
+
+export DOKKU_LOGS_DIR=${DOKKU_LOGS_DIR:="/var/log/dokku"}
+export DOKKU_EVENTS_LOGFILE=${DOKKU_EVENTS_LOGFILE:="$DOKKU_LOGS_DIR/events.log"}
+
+export DOKKU_CONTAINER_LABEL=dokku
+export DOKKU_GLOBAL_RUN_ARGS="--label=$DOKKU_CONTAINER_LABEL"
+
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+parse_args "$@"
+args=("$@")
+skip_arg=false
+if [[ "${args[0]}" =~ ^--.* ]]; then
+  for arg in "$@"; do
+    $skip_arg && skip_arg=false && continue
+    if [[ "$arg" == "--app" ]]; then
+      shift 2 && skip_arg=true
+    elif [[ "$arg" =~ ^--.* ]]; then
+      shift 1
+    else
+      break
+    fi
+  done
+fi
+! has_tty && DOKKU_QUIET_OUTPUT=1
+
+if [[ $(id -un) != "dokku" ]] && [[ ! $1 =~ plugin:* ]] && [[ ! $1 == "ssh-keys:add" ]]; then
+  export SSH_USER=$(id -un)
+  sudo -u dokku -E -H "$0" "$@"
+  exit $?
+fi
+
+if [[ $1 =~ ^plugin:.* && $1 != "plugin:help" && $1 != "plugin:list" ]] || [[ $1 == "ssh-keys:add" ]]; then
+  if [[ $(id -un) != "root" ]]; then
+    dokku_log_fail "This command must be run as root"
+  else
+    export SSH_USER=root
+  fi
+fi
+
+if [[ -n "$SSH_ORIGINAL_COMMAND" ]]; then
+  export -n SSH_ORIGINAL_COMMAND
+  if [[ $1 =~ config-* ]] || [[ $1 =~ docker-options* ]]; then
+    # shellcheck disable=SC2086
+    xargs $0 <<<$SSH_ORIGINAL_COMMAND
+    exit $?
+  else
+    set -f
+    # shellcheck disable=SC2086
+    $0 $SSH_ORIGINAL_COMMAND
+    set +f
+    exit $?
+  fi
+fi
+
+if ! dokku_auth "$@" ; then
+  dokku_log_fail "Access denied"
+  exit 1
+fi
+
+execute_dokku_cmd() {
+  declare desc="executes dokku sub-commands"
+  local PLUGIN_NAME="$1"
+  local PLUGIN_CMD=$PLUGIN_NAME
+  local implemented=0; local script
+  local argv=("$@")
+
+  case "$PLUGIN_NAME" in
+    events|events:*)
+      local PLUGIN_NAME=${PLUGIN_NAME/events/20_events}
+      ;;
+    nginx|nginx:*)
+      local PLUGIN_NAME=${PLUGIN_NAME/nginx/nginx-vhosts}
+      ;;
+    deploy|delete|ls|run|cleanup)
+      local PLUGIN_NAME="00_dokku-standard"
+      ;;
+    trace|url|urls|report|version)
+      local PLUGIN_NAME="00_dokku-standard"
+      ;;
+  esac
+
+  if [[ "$(readlink -f "$PLUGIN_ENABLED_PATH/${PLUGIN_NAME%%:*}")" == *core-plugins* ]] ; then
+    [[ ${argv[0]} == "$PLUGIN_CMD" ]] && shift 1
+    if [[ ! -z $DOKKU_APP_NAME ]]; then
+      if [[ "$PLUGIN_CMD" == config* ]] && [[ ${argv[1]} == "--no-restart" ]]; then
+        shift 1
+        set -- "--no-restart" "$DOKKU_APP_NAME" "$@"
+      else
+        set -- "$DOKKU_APP_NAME" "$@"
+      fi
+    fi
+    set -- "$PLUGIN_CMD" "$@"
+  fi
+
+  if [[ -x $PLUGIN_ENABLED_PATH/$PLUGIN_NAME/subcommands/default ]]; then
+    "$PLUGIN_ENABLED_PATH/$PLUGIN_NAME/subcommands/default" "$@"
+    implemented=1
+  elif [[ -x $PLUGIN_ENABLED_PATH/$PLUGIN_NAME/subcommands/$PLUGIN_CMD ]]; then
+    "$PLUGIN_ENABLED_PATH/$PLUGIN_NAME/subcommands/$PLUGIN_CMD" "$@"
+    implemented=1
+  elif [[ -x $PLUGIN_ENABLED_PATH/${PLUGIN_NAME%%:*}/subcommands/${1#*:} ]] && [[ -n "${1#*:}" ]]; then
+    "$PLUGIN_ENABLED_PATH/${PLUGIN_NAME%%:*}/subcommands/${1#*:}" "$@"
+    implemented=1
+  fi
+
+  if [[ $implemented -eq 0 ]];then
+    for script in $PLUGIN_ENABLED_PATH/*/commands; do
+      set +e; $script "$@" ; exit_code=$? ; set -e
+      if [[ "$exit_code" -eq "$DOKKU_NOT_IMPLEMENTED_EXIT" ]]; then
+        continue
+      fi
+      implemented=1
+      if [[ "$exit_code" -ne "$DOKKU_VALID_EXIT" ]]; then
+        exit $exit_code
+      fi
+    done
+  fi
+
+  if [[ "$implemented" -eq 0 ]]; then
+    dokku_log_warn "\`$*\` is not a dokku command."
+    dokku_log_warn "See \`dokku help\` for a list of available commands."
+    exit 1
+  fi
+}
+
+case "$1" in
+  help|'')
+    export LC_ALL=C # so sort will respect non alpha characters
+    ALL_PLUGIN_COMMANDS=$(find -L "$PLUGIN_PATH/enabled" -name commands 2> /dev/null || true)
+
+    # build list of core plugin command files
+    for plugin_command in $ALL_PLUGIN_COMMANDS;do
+      if [[ "$(readlink -f "$plugin_command")" == *core-plugins* ]]; then
+        CORE_PLUGIN_COMMANDS+="$plugin_command "
+      fi
+    done
+    # build list of non-core plugin command files
+    for plugin_command in $ALL_PLUGIN_COMMANDS;do
+      if [[ "$(readlink -f "$plugin_command")" != *core-plugins* ]]; then
+        COMMUNITY_PLUGIN_COMMANDS+="$plugin_command "
+      fi
+    done
+
+    # New lines are blank echos for readability
+    echo "Usage: dokku [--quiet|--trace|--rm-container|--rm|--force] COMMAND <app> [command-specific-options]"
+    echo ""
+    echo "Primary help options, type \"dokku COMMAND:help\" for more details, or dokku help --all to see all commands."
+    echo ""
+    echo "Commands:"
+    echo ""
+
+    if [[ "$2" == "--all" ]] ; then
+      for core_plugin_command in $CORE_PLUGIN_COMMANDS; do
+        $core_plugin_command help
+      done | sort | column -c2 -t -s,
+      echo ""
+      echo "Community plugin commands:"
+      echo ""
+      for community_plugin_command in $COMMUNITY_PLUGIN_COMMANDS; do
+        $community_plugin_command help
+      done | sort | column -c2 -t -s,
+    else
+      for core_plugin_command in $CORE_PLUGIN_COMMANDS; do
+        $core_plugin_command help
+      # When done, sort, sed cuts arugments out of strings and colum make it pretty
+      done | sort | sed -e '/^.*:/d' -e 's/\s[\[\<\-\(].*,/,/' | column -c2 -t -s,
+      if [[ -n "$COMMUNITY_PLUGIN_COMMANDS" ]]; then
+        echo ""
+        echo "Community plugin commands:"
+        echo ""
+        for community_plugin_command in $COMMUNITY_PLUGIN_COMMANDS; do
+          $community_plugin_command help
+        done | sort | column -c2 -t -s,
+      fi
+    fi
+    ;;
+
+  *)
+    execute_dokku_cmd "$@"
+    ;;
+
+esac

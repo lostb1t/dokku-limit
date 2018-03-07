@@ -1,0 +1,4 @@
+[plugin]
+description = "dokku core certificate management plugin"
+version = "0.11.4"
+[plugin.config]

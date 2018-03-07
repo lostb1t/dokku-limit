@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
+source "$PLUGIN_CORE_AVAILABLE_PATH/common/functions"
+
+config_sub() {
+  declare desc="executes a config subcommand"
+  local name="$1"
+  shift
+  "$PLUGIN_AVAILABLE_PATH/config/subcommands/$name" "config:$name" "$@"
+}
+
+config_export() {
+  declare desc="returns export command for config variable of specified type (app/global)"
+  local CONFIG_TYPE="$1"
+  shift
+  local APP="$1"
+  if [[ $CONFIG_TYPE == "global" ]]; then
+    APP="--global"
+  else
+    shift
+  fi
+  config_sub export "$@" "$APP"
+  return 0
+}
+
+
+config_all() {
+  declare desc="Backwards compatible function for plugin use"
+  [[ "$1" == "config" ]] || set -- "config" "$@"
+  if [[ -n "$DOKKU_CONFIG_EXPORT" ]]; then
+    config_export app "$@"
+    return 0
+  fi
+
+  "$PLUGIN_AVAILABLE_PATH/config/commands" "$@"
+}
+
+config_keys() {
+  declare desc="returns keys for app or global"
+  config_sub keys "$@"
+  return 0
+}
+
+config_get() {
+  declare desc="get value of given config var"
+  config_sub get "$@"
+}
+
+config_set() {
+  declare desc="set value of given config var"
+  config_sub set "$@"
+}
+
+config_unset() {
+  declare desc="unset value of given config var"
+  config_sub unset "$@"
+}
+
+config_bundle() {
+  declare desc="export tar bundle of config"
+  config_sub bundle "$@"
+}

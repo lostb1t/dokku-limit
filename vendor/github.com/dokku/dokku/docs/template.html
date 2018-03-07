@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>Dokku - The smallest PaaS implementation you've ever seen</title>
+
+    <link rel="apple-touch-icon" sizes="57x57" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/manifest.json">
+    <link rel="shortcut icon" href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/favicon.ico">
+    <meta name="apple-mobile-web-app-title" content="Dokku">
+    <meta name="application-name" content="Dokku">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-TileImage" content="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/mstile-144x144.png">
+    <meta name="msapplication-config" content="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/favicons/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+
+    <script>
+      if ('{{DOC}}' == 'index.md') {
+        var indexLink = '/{{NAME}}/';
+        if ('{{REF}}' !== 'master') {
+          indexLink = '/{{NAME}}~{{REF}}/';
+        }
+        window.location.replace(window.location.origin + indexLink);
+      }
+    </script>
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-alpha.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.rawgit.com/dokku/dokku/v0.11.4/docs/assets/style.css" rel="stylesheet">
+    <!-- <link href="/dokku/docs/assets/style.css" rel="stylesheet"> -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      }
+      .list-group-item {
+        font-size: 14px;
+      }
+      .markdown-body {
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="dev-warning doc-floating-warning" style="display:none">
+      This document is for dokku's development version, which can be significantly different from previous releases. For older releases, use the version selector floating in the bottom right corner of this page.
+    </div>
+    <div class="header">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-offset-2">
+            <h1 class="heading navbar-brand">
+              <a href="/{{NAME}}/">Dokku</a>
+            </h1>
+            <ul class="nav nav-pills pull-xs-right col-md-offset-right-2">
+              <li class="nav-item">
+                <a class="nav-link" href="https://dokku.github.io/">Blog</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://github.com/dokku/dokku/">Code</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/{{NAME}}/getting-started/installation/">Docs</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://webchat.freenode.net/?channels=dokku">IRC</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://glider-slackin.herokuapp.com/">Slack</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="https://gliderlabs.us10.list-manage.com/subscribe?u=49c4b06ffd30bcf49ec53c277&amp;id=f526006fd5">Newsletter</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div class="improve-slideout">
+        <i class="fa fa-pencil icon-improve"></i>
+        <a href="https://github.com/{{USER}}/{{NAME}}/edit/master/docs/{{DOC}}" target="_blank">
+          <div class="improve-slideout-inner"><h6>Improve This Doc <i class="fa fa-github git-improve"></i></h6></div>
+        </a>
+      </div>
+      <a class="back-to-contents" href="#page-contents"><i class="fa fa-arrow-circle-up icon-improve" title="Back to Contents"></i></a>
+
+      <div class="row">
+        <div class="col-xs-8 col-md-6 col-md-push-4 markdown-body" style="padding-top:16px">
+          {{CONTENT}}
+        </div>
+        <div class="col-xs-4 col-md-2 col-md-pull-6 col-md-offset-2" style="padding-top:16px">
+          <div class="list-group">
+            <a href="#" class="list-group-item disabled">Getting Started</a>
+            <a href="/{{NAME}}/getting-started/installation/" class="list-group-item">Getting Started with Dokku</a>
+            <a href="/{{NAME}}/getting-started/upgrading/" class="list-group-item">Upgrading Dokku</a>
+            <a href="/{{NAME}}/getting-started/uninstalling/" class="list-group-item">Uninstalling Dokku</a>
+            <a href="/{{NAME}}/getting-started/troubleshooting/" class="list-group-item">Troubleshooting</a>
+            <a href="/{{NAME}}/getting-started/where-to-get-help/" class="list-group-item">Getting Help</a>
+
+            <a href="#" class="list-group-item disabled">Deployment</a>
+
+            <a href="/{{NAME}}/deployment/application-deployment/" class="list-group-item">Deploying an Application</a>
+            <a href="/{{NAME}}/deployment/application-management/" class="list-group-item">Application Management</a>
+            <a href="/{{NAME}}/deployment/logs/" class="list-group-item">Application Logs</a>
+            <a href="/{{NAME}}/deployment/remote-commands/" class="list-group-item">Remote Commands</a>
+            <a href="/{{NAME}}/deployment/one-off-processes/" class="list-group-item">One Off Processes/Cron</a>
+            <a href="/{{NAME}}/deployment/process-management/" class="list-group-item">Process Scaling</a>
+            <a href="/{{NAME}}/deployment/user-management/" class="list-group-item">User Management</a>
+            <a href="/{{NAME}}/deployment/zero-downtime-deploys/" class="list-group-item">Zero Downtime Deploy Checks</a>
+
+            <a href="#" class="list-group-item disabled">Deployment Methods</a>
+
+            <a href="/{{NAME}}/deployment/methods/buildpacks/" class="list-group-item">Buildpack Deployment</a>
+            <a href="/{{NAME}}/deployment/methods/dockerfiles/" class="list-group-item">Dockerfile Deployment</a>
+            <a href="/{{NAME}}/deployment/methods/images/" class="list-group-item">Docker Image Deployment</a>
+            <a href="/{{NAME}}/deployment/methods/tar/" class="list-group-item">Tarfile Deployment</a>
+
+            <a href="#" class="list-group-item disabled">Configuration</a>
+
+            <a href="/{{NAME}}/configuration/environment-variables/" class="list-group-item">Environment Variables</a>
+            <a href="/{{NAME}}/configuration/domains/" class="list-group-item">Domain Configuration</a>
+            <a href="/{{NAME}}/configuration/nginx/" class="list-group-item">Nginx Configuration</a>
+            <a href="/{{NAME}}/configuration/ssl/" class="list-group-item">SSL Configuration</a>
+
+            <a href="#" class="list-group-item disabled">Network Management</a>
+
+            <a href="/{{NAME}}/networking/dns/" class="list-group-item">DNS Configuration</a>
+            <a href="/{{NAME}}/networking/network/" class="list-group-item">Network Management</a>
+            <a href="/{{NAME}}/networking/port-management/" class="list-group-item">Port Management</a>
+            <a href="/{{NAME}}/networking/proxy-management/" class="list-group-item">Proxy Management</a>
+
+            <a href="#" class="list-group-item disabled">Advanced Usage</a>
+
+            <a href="/{{NAME}}/advanced-usage/backup-recovery/" class="list-group-item">Backup and Recovery</a>
+            <a href="/{{NAME}}/advanced-usage/deployment-tasks/" class="list-group-item">Deployment Tasks</a>
+            <a href="/{{NAME}}/advanced-usage/docker-options/" class="list-group-item">Docker Container Options</a>
+            <a href="/{{NAME}}/advanced-usage/event-logs/" class="list-group-item">Event Logs</a>
+            <a href="/{{NAME}}/advanced-usage/persistent-storage/" class="list-group-item">Persistent Storage</a>
+            <a href="/{{NAME}}/advanced-usage/plugin-management/" class="list-group-item">Plugin Management</a>
+            <a href="/{{NAME}}/advanced-usage/repository-management/" class="list-group-item">Repository Management</a>
+
+            <a href="#" class="list-group-item disabled">Community Contributions</a>
+
+            <a href="/{{NAME}}/community/clients/" class="list-group-item">Clients</a>
+            <a href="/{{NAME}}/community/plugins/" class="list-group-item">Plugins</a>
+
+            <a href="#" class="list-group-item disabled">Development</a>
+
+            <a href="/{{NAME}}/development/plugin-creation/" class="list-group-item">Plugin Creation</a>
+            <a href="/{{NAME}}/development/plugin-triggers/" class="list-group-item">Plugin Triggers</a>
+            <a href="/{{NAME}}/development/testing/" class="list-group-item">Running Tests</a>
+            <a href="/{{NAME}}/development/release-process/" class="list-group-item">Release Process</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rst-versions rst-badge" data-toggle="rst-versions">
+      <span class="rst-current-version" data-toggle="rst-current-version" data-doc="{{DOC}}" data-ref="{{REF}}">
+        <span class="fa fa-book">&nbsp;</span>
+        v: {{REF}}
+        <span class="fa fa-caret-down"></span>
+      </span>
+      <div class="rst-other-versions">
+        <dl>
+          <dt>Versions</dt>
+        </dl>
+
+        <dl>
+          <dt>On GitHub</dt>
+          <dd>
+            <a href="https://github.com/{{USER}}/{{NAME}}/blob/master/docs/{{DOC}}" target="_blank">View</a>
+          </dd>
+          <dd>
+            <a href="https://github.com/{{USER}}/{{NAME}}/edit/master/docs/{{DOC}}" target="_blank">Edit</a>
+          </dd>
+        </dl>
+        <hr>
+
+        Free document hosting provided by <a href="http://progrium.viewdocs.io/viewdocs/">Viewdocs</a>.
+      </div>
+    </div>
+
+    <div class="dev-warning doc-floating-warning" style="display:none">
+      This document is for dokku's development version, which can be significantly different from previous releases. For older releases, use the version selector floating in the bottom right corner of this page.
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/1.3.0/anchor.js"></script>
+    <script>
+    // Source: https://github.com/Alhadis/Snippets/blob/master/js/polyfills/IE8-child-elements.js
+    if (!('nextElementSibling' in document.documentElement)) {
+      Object.defineProperty(Element.prototype, 'nextElementSibling', {
+        get: function () {
+          var e = this.nextSibling;
+          while (e && 1 !== e.nodeType) {
+            e = e.nextSibling;
+          }
+          return e;
+        }
+      });
+    }
+    // Source: https://jonlabelle.com/snippets/view/javascript/wrap-an-html-element-in-javascript
+    HTMLElement.prototype.wrap = function (elms) {
+        if (!elms.length) elms = [elms];
+        for (var i = elms.length - 1; i >= 0; i--) {
+            var child = (i > 0) ? this.cloneNode(true) : this;
+            var el = elms[i];
+            var parent = el.parentNode;
+            var sibling = el.nextSibling;
+            child.appendChild(el);
+            if (sibling) {
+                parent.insertBefore(child, sibling);
+            } else {
+                parent.appendChild(child);
+            }
+        }
+    };
+
+    document.addEventListener('DOMContentLoaded', function (e) {
+      var markdownBody = document.querySelectorAll('.markdown-body')[0],
+          isRedirect = markdownBody.innerHTML.trim().indexOf('<p>See the <a href=') === 0;
+      if (isRedirect) {
+          var redirectUrl = markdownBody.getElementsByTagName('a')[0].href;
+          window.location.replace(redirectUrl);
+      }
+      anchors.options.visible = 'always';
+      anchors.add('.markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4, .markdown-body h5, .markdown-body h6');
+
+      var tables = document.querySelectorAll('table'),
+          blockquotes = document.querySelectorAll('blockquote'),
+          versionList = document.querySelectorAll('.rst-other-versions dl')[0],
+          backToContentsEl = document.querySelectorAll('.back-to-contents')[0]
+          currentVersionEl = document.querySelectorAll('.rst-current-version')[0],
+          currentVersion = currentVersionEl.getAttribute('data-ref'),
+          versionContainer = document.querySelectorAll('.rst-versions.rst-badge')[0],
+          pageHeader = document.querySelectorAll('.markdown-body p')[0],
+          headers = document.querySelectorAll('h2, h3, h4'),
+          classNames = ['table', 'table-striped', 'table-hover', 'table-condensed'],
+          localPath = location.pathname.split('/').splice(2).join('/'),
+          addClass = function (el, className) {
+            if (el.classList) {
+              el.classList.add(className);
+            } else {
+              el.className += ' ' + className;
+            }
+          },
+          addListener = function (elem, type, fn) {
+            if (elem.addEventListener) {
+              elem.addEventListener(type, fn, false);
+            } else if (elem.attachEvent) {
+              elem.attachEvent('on' + type, function() {
+                return fn.call(elem, window.event);
+              });
+            } else {
+              elem['on' + type] = fn;
+            }
+          },
+          hasClass = function (el, className) {
+            if (el.classList) {
+              return el.classList.contains(className);
+            } else {
+              return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
+            }
+          },
+          removeClass = function (el, className) {
+            if (el.classList) {
+              el.classList.remove(className);
+            } else {
+              el.className = el.className.replace(new RegExp('(^|\\b)' + className.split(' ').join('|') + '(\\b|$)', 'gi'), ' ');;
+            }
+          },
+          languageClass = function (el) {
+            if (!hasClass(el, 'highlight')) {
+              return;
+            }
+            var classes = [];
+            if (el.classList) {
+              classes = el.classList.value.split(/\s+/);
+            } else {
+              classes = el.className.split(/\s+/);
+            }
+            var language = null;
+            for (i = 0; i < classes.length; i++) {
+              if (classes[i].lastIndexOf('highlight-source-', 0) === 0) {
+                language = classes[i].replace('highlight-source-', '');
+                break;
+              }
+            }
+            return language;
+          };
+
+    addListener(backToContentsEl, 'click', function(e) {
+      e.preventDefault();
+      var scrollToTop = window.setInterval(function() {
+        var pos = window.pageYOffset;
+        if ( pos > 0 ) {
+          window.scrollTo( 0, pos - 20 );
+        } else {
+          window.clearInterval( scrollToTop );
+        }
+      }, 1);
+      return false;
+    });
+
+      var ls2 = {
+        save : function (key, jsonData, expirationMS) {
+          if (typeof (Storage) === 'undefined') { return false; }
+          var record = {value: JSON.stringify(jsonData), timestamp: new Date().getTime()/1000 + expirationMS}
+          localStorage.setItem(key, JSON.stringify(record));
+          return jsonData;
+        },
+        load : function (key) {
+          if (typeof (Storage) === 'undefined') { return false; }
+          var record = JSON.parse(localStorage.getItem(key));
+          if (!record){return false;}
+          return (new Date().getTime()/1000 < record.timestamp && JSON.parse(record.value));
+        }
+      };
+
+      var ToC =
+        '<nav role="navigation" class="table-of-contents">' +
+          '<ul>';
+
+      var newLine, el, title, link, currentDepth, count = 0, lastNodeDepth = null;
+      Array.prototype.forEach.call(headers, function (el, i) {
+        count++;
+        title = el.innerText || element.textContent;
+        link = '#' + el.getAttribute('id');
+        currentDepth = parseInt(el.nodeName.replace('H', ''), 10);
+
+        newLine =
+          '<li>' +
+            '<a href="' + link + '" class="current-depth-' + currentDepth + '">' +
+              title +
+            '</a>' +
+          '</li>';
+
+        if (currentDepth === lastNodeDepth || lastNodeDepth === null) {
+        } else if (currentDepth > lastNodeDepth) {
+          newLine = '<ul>' + newLine;
+        } else if (currentDepth < lastNodeDepth) {
+          newLine = '</ul>' + newLine;
+        }
+        ToC += newLine;
+
+        lastNodeDepth = currentDepth;
+      });
+      ToC += '</ul></nav>';
+
+      if (count > 1) {
+        var navItems = document.querySelectorAll('.list-group-item');
+        Array.prototype.forEach.call(navItems, function(el, i){
+          if (el.getAttribute('href') == location.pathname) {
+            el.insertAdjacentHTML('afterEnd', ToC);
+          }
+        });
+      }
+
+      Array.prototype.forEach.call(blockquotes, function (el, i) {
+        if (el.innerHTML.toLowerCase().indexOf('new as of') !== -1) {
+          addClass(el, 'new-as-of');
+        } else if (el.innerHTML.toLowerCase().indexOf('not yet released') !== -1) {
+          addClass(el, 'not-yet-released');
+        }
+      });
+      Array.prototype.forEach.call(classNames, function (className, i) {
+        Array.prototype.forEach.call(tables, function (el, i) {
+          addClass(el, className);
+        });
+      });
+
+      var addLanguageLabel = function (el, language) {
+        var labelWrapper = document.createElement('div'),
+            label = document.createElement('div');
+
+        labelWrapper.setAttribute('class', 'highlight-show-language');
+        label.setAttribute('class', 'highlight-show-language-label');
+        label.appendChild(document.createTextNode(language));
+        labelWrapper.appendChild(label);
+        el.insertBefore(labelWrapper, el.firstChild);
+      };
+
+      var highlightElements = document.querySelectorAll('pre');
+      Array.prototype.forEach.call(highlightElements, function(el, i) {
+        var language = languageClass(el.parentElement);
+        if (typeof (language) === 'undefined') {
+          return;
+        }
+
+        addLanguageLabel(el.parentElement, language);
+
+        var nextEl = el.parentElement.nextElementSibling;
+        if (nextEl !== null && nextEl.nodeName.toLowerCase() === 'pre') {
+          var wrapper = document.createElement('div');
+          wrapper.setAttribute('class', 'highlight-output');
+          wrapper.wrap(nextEl);
+          addLanguageLabel(wrapper, 'output');
+          addClass(el, 'highlight-has-output');
+        }
+      });
+
+      addListener(currentVersionEl, 'click', function() {
+        if (hasClass(versionContainer, 'shift-up')) {
+          removeClass(versionContainer, 'shift-up');
+        } else {
+          addClass(versionContainer, 'shift-up');
+        }
+      });
+
+      var range = function(start, count) {
+        return Array.apply(0, Array(count))
+                    .map(function (element, index) {
+                             return index + start;
+                         });
+      }
+
+      var parseVersions = function(version, versions) {
+        var pieces = version.split('.'),
+            prefix = pieces.slice(0, 2).join('.') + '.',
+            maxPatchVersion = parseInt(pieces.slice(2, 3)[0], 10),
+            versionRange = range(0, maxPatchVersion + 1);
+
+        for (var i in versionRange) {
+          versions.push(prefix.concat(versionRange[i]));
+        }
+        return versions;
+      }
+
+      var addVersionLink = function(version) {
+        var a = document.createElement('a'),
+                dd = document.createElement('dd'),
+                ref = 'dokku~v' + version,
+                versionName = 'v' + version;
+        if (version == 'master') {
+          ref = 'dokku';
+          versionName = 'master';
+        }
+
+        a.setAttribute('href', '/' + ref + '/' + localPath);
+        a.appendChild(document.createTextNode(versionName));
+        if (versionName == currentVersion) {
+          var strong = document.createElement('strong');
+          strong.appendChild(a);
+          dd.appendChild(strong);
+        } else {
+          dd.appendChild(a);
+        }
+        versionList.appendChild(dd);
+      };
+
+      var processVersions = function(data) {
+        var versions = [];
+        for (var key in data['max-versions']) {
+          if (!data['max-versions'].hasOwnProperty(key)) {
+            continue;
+          }
+
+          versions = parseVersions(data['max-versions'][key], versions);
+        }
+
+        addVersionLink('master');
+        Array.prototype.forEach.call(versions, function (version, i) {
+          addVersionLink(version);
+        });
+      };
+
+      if (currentVersion === 'master') {
+        document.querySelectorAll('.dev-warning')[0].style.position = 'relative';
+        Array.prototype.forEach.call(document.querySelectorAll('.dev-warning'), function (el, i) {
+          el.style.display = '';
+        });
+      }
+
+      data = ls2.load('max-versions');
+      if (!data) {
+        var request = new XMLHttpRequest();
+        request.open('GET', '/dokku/assets/versions.json', true);
+        request.setRequestHeader('Cache-Control', 'no-cache, no-store');
+
+        request.onload = function() {
+          if (request.status >= 200 && request.status < 400) {
+            var data = JSON.parse(request.responseText);
+            // store for 1 day
+            ls2.save('max-versions', data, 86400);
+            processVersions(data);
+          }
+        };
+
+        request.onerror = function() {
+          // There was a connection error of some sort
+        };
+
+        request.send();
+      } else {
+        processVersions(data);
+      }
+    });
+    </script>
+  </body>
+</html>
