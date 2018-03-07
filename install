@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
 set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 
-# Check for cgroups and put out a warning https://github.com/moby/moby/issues/4250
-# or maybe handle it for the users
-
-make
+make -f Makefile
