@@ -9,15 +9,16 @@ import (
 
 
 func CommandSet(args []string, noRestart bool) error {
-	// TODO: Add args validation
+	if len(args) == 0 {
+		common.LogFail("Please specify an app")
+	}
+	if len(args) == 1 {
+		common.LogFail("Please specify an process")
+	}
 	appName := args[0]
 	procName := args[1]
 	verifyAppName(appName)
 	new_limits := resource.Parse(args[2:])
-
-	if !common.IsDeployed(appName) {
-		common.LogFail("App has not been deployed")
-	}
 
 	// Check if process exists.
 	app_processes := resource.GetAppProcs(appName)
@@ -43,6 +44,9 @@ func CommandSet(args []string, noRestart bool) error {
 	limits.SaveToApp(appName)
 
 	if !noRestart {
+		if !common.IsDeployed(appName) {
+			common.LogFail("App has not been deployed")
+		}
 		triggerRestart(appName)
 	}
 

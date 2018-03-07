@@ -19,7 +19,7 @@ sudo dokku plugin:install https://github.com/sarendsen/dokku-limit.git limit
 
 ```
 limit (<app> <proc>), Pretty-print resource limits
-limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for given app/process pair
+limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
 ```
 
 
