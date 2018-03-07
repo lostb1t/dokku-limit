@@ -1,7 +1,7 @@
 GO_REPO_ROOT := /go/src/github.com/sarendsen/dokku-limit
 BUILD_IMAGE := golang:1.9.1
 
-.PHONY: build-in-docker build clean src-clean
+.PHONY: build-in-docker build clean
 
 GO_ARGS ?= -a
 
@@ -29,6 +29,3 @@ hooks:
 
 clean:
 	rm -rf commands subcommands docker-args-deploy
-
-src-clean:
-	rm -rf .gitignore cmd pkg triggers vendor Makefile *.go
