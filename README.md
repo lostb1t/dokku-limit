@@ -26,11 +26,11 @@ limit:unset <app> <proc> [memory cpu] [--no-restart], Unset one or more limits f
 
 ## Resources
 
-memory
+**memory**
 
 The maximum amount of memory the process can use. example: "500m"
 
-cpu
+**cpu**
 
 The maximum amount of CPU resources the process can use. example: "50"
 
