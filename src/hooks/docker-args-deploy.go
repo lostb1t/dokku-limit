@@ -36,7 +36,7 @@ func main() {
 
     args := resources.DockerOptions()
     if args != nil {
-        fmt.Println(stdin, strings.Join(args, " "))
+        fmt.Print(stdin, strings.Join(args, " "))
     } else {
         fmt.Printf("%s", stdin)
     }

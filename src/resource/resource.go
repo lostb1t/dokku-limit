@@ -21,6 +21,12 @@ const (
     TypeCPU Type = "cpu"
 )
 
+
+var ResourceTypes = []Type{
+    TypeMemory,
+    TypeCPU,
+}
+
 // TODO: Load defaults from globals
 var defaults = Resources{}
 

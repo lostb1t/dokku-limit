@@ -3,8 +3,9 @@ package config
 import (
     "fmt"
     "strings"
-    resource "github.com/sarendsen/dokku-limit/src/resource"
+    columnize "github.com/ryanuber/columnize"
     "github.com/dokku/dokku/plugins/common"
+    resource "github.com/sarendsen/dokku-limit/src/resource"
 )
 
 
@@ -112,14 +113,14 @@ func CommandReport(args []string) {
     }
 
     if apps == nil {
-        fmt.Print("No limits set")
+        fmt.Println("No limits set")
     }
 
     // todo: better looking formatting
     for appName, limits := range apps {
         for procName, resources := range limits {
-            fmt.Printf("=====%s=====\n", appName)
-            formatLimits(procName, resources)
+            common.LogInfo2(appName + " limits")
+            fmt.Println(formatLimits(procName, resources))
         }
     }
 }
@@ -127,13 +128,27 @@ func CommandReport(args []string) {
 
 // Helpers
 
+func formatLimits(procName string, resources resource.Resources) string {
+    config := columnize.DefaultConfig()
+    config.Delim = "|"
+    config.Empty = "-"
 
-func formatLimits(procName string, resources resource.Resources) {
-    limits := make([]string, 0, len(resources))
-    for typ, r := range resources {
-        limits = append(limits, fmt.Sprintf("%s=%s", typ, resource.Format(typ, r)))
-    } 
-    fmt.Printf("%s:\t%s\n", procName, strings.Join(limits, "\t"))
+    header := make([]string, 0, len(resource.ResourceTypes))
+    limits := make([]string, 0, len(resource.ResourceTypes))
+    for _, typ := range resource.ResourceTypes {
+        header = append(header, string(typ))
+        if r, ok := resources[typ]; ok {
+            limits = append(limits, resource.Format(typ, r))
+        } else {
+            limits = append(limits, "")
+        }
+    }
+
+    content := []string{
+        strings.Join(header, config.Delim),
+        strings.Join(limits, config.Delim),
+    }
+    return columnize.Format(content, config)
 }
 
 
