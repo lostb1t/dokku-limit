@@ -28,6 +28,18 @@ var defaults = Resources{}
 type Resources map[Type]int64
 
 
+// Returns formatted docker arguments
+func (r Resources) DockerOptions() ([]string) {
+	args := make([]string, len(r))
+
+	for typ, limit := range r {
+		args = append(args, FormatDocker(typ, limit))
+	}
+
+	return args
+}
+
+
 func Defaults() Resources {
 	r := Resources{}
 	copier.Copy(&r, &defaults)
@@ -48,25 +60,7 @@ func (l Limits) SaveToApp(appName string) error {
 }
 
 
-// Returns formatted docker arguments
-// todo: Move this to the resources type
-func (l Limits) DockerOptions(procName string) ([]string) {
-	args := make([]string, len(l))
-
-	limits, ok := l[procName]
-	if !ok {
-		return nil
-	}
-
-	for typ, limit := range limits {
-		args = append(args, FormatLimitDocker(typ, limit))
-	}
-
-	return args
-}
-
-
-func FormatLimit(typ Type, limit int64) string {
+func Format(typ Type, limit int64) string {
 	switch typ {
 	case TypeMemory:
 		return units.BytesSize(float64(limit))
@@ -78,7 +72,7 @@ func FormatLimit(typ Type, limit int64) string {
 }
 
 
-func FormatLimitDocker(typ Type, limit int64) string {
+func FormatDocker(typ Type, limit int64) string {
 	switch typ {
 	case TypeMemory:
 		return fmt.Sprintf("--memory=%d", limit)

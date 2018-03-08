@@ -130,8 +130,8 @@ func CommandReport(args []string) {
 
 func formatLimits(procName string, resources resource.Resources) {
 	limits := make([]string, 0, len(resources))
-	for typ, limit := range resources {
-		limits = append(limits, fmt.Sprintf("%s=%s", typ, resource.FormatLimit(typ, limit)))
+	for typ, r := range resources {
+		limits = append(limits, fmt.Sprintf("%s=%s", typ, resource.Format(typ, r)))
 	} 
 	fmt.Printf("%s:\t%s\n", procName, strings.Join(limits, "\t"))
 }
