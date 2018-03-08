@@ -20,6 +20,7 @@ sudo dokku plugin:install https://github.com/sarendsen/dokku-limit.git limit
 ```
 limit (<app>), Pretty-print resource limits
 limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
+limit:unset <app> <proc> [memory cpu] [--no-restart], Unset one or more limits for app/process pair
 ```
 
 
@@ -41,6 +42,9 @@ This guarantees the process uses at most 50% of CPU every second.
 ```
 # Set cpu to 50% and memory to 500 MB for process "web"
 dokku limit:set my_app web cpu=50 memory=500m
+
+# Unset cpu for process "web"
+dokku limit:unset my_app web cpu
 
 # Show all resource limits
 dokku limit

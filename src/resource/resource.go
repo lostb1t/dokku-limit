@@ -17,7 +17,6 @@ type Type string
 
 
 const (
-	// TypeMemory specifies the available memory in bytes inside a container.
 	TypeMemory Type = "memory"
 	TypeCPU Type = "cpu"
 )
@@ -41,6 +40,7 @@ type Limits map[string]Resources
 
 // Save limits
 func (l Limits) SaveToApp(appName string) error {
+	cleanLimits(l)
 	filePath := LimitFilePath(appName)
     rJson, _ := yaml.Marshal(l)
     err := ioutil.WriteFile(filePath, rJson, 0644)
@@ -49,7 +49,7 @@ func (l Limits) SaveToApp(appName string) error {
 
 
 // Returns formatted docker arguments
-// TODO: Move this to the resources type
+// todo: Move this to the resources type
 func (l Limits) DockerOptions(procName string) ([]string) {
 	args := make([]string, len(l))
 
@@ -168,6 +168,8 @@ func LoadForApp(appName string) Limits {
 	limits := Limits{}
     err = yaml.Unmarshal(raw, &limits)
 
+    cleanLimits(limits)
+
     return limits
 }
 
@@ -192,4 +194,12 @@ func GetAppProcs(appName string) map[string]bool {
     }
 
     return procs
+}
+
+func cleanLimits(l Limits) {
+	for procName, resources := range l {
+		if len(resources) == 0 {
+			delete(l, procName)
+		}
+	}
 }

@@ -5,7 +5,7 @@ BUILD_IMAGE := golang:1.9.1
 
 GO_ARGS ?= -a
 
-SUBCOMMANDS = subcommands/set
+SUBCOMMANDS = subcommands/set subcommands/unset
 
 build-in-docker: clean
 	docker run --rm \

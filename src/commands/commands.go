@@ -19,6 +19,7 @@ Additional commands:`
 	helpContent = `
     limit (<app>), Pretty-print limits
     limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
+    limit:unset <app> <proc> [memory cpu] [--no-restart], Unset one or more limits for app/process pair
 `
 )
 
