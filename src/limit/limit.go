@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
-	resource "github.com/sarendsen/dokku-limit/pkg/resource"
+	resource "github.com/sarendsen/dokku-limit/src/resource"
 	"github.com/dokku/dokku/plugins/common"
 )
 

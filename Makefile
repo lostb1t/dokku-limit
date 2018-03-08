@@ -17,18 +17,18 @@ build-in-docker: clean
 build: commands subcommands hooks
 
 commands: **/**/commands.go
-	go build $(GO_ARGS) -o commands cmd/commands/commands.go
+	go build $(GO_ARGS) -o commands src/commands/commands.go
 
 subcommands: $(SUBCOMMANDS)
 
-subcommands/%: cmd/subcommands/%.go
+subcommands/%: src/subcommands/%.go
 	go build $(GO_ARGS) -o $@ $<
 
 hooks:
-	go build $(GO_ARGS) -o docker-args-deploy cmd/hooks/docker-args-deploy.go
+	go build $(GO_ARGS) -o docker-args-deploy src/hooks/docker-args-deploy.go
 
 clean:
 	rm -rf commands subcommands docker-args-deploy
 
 src-clean:
-	rm -rf .gitignore cmd pkg vendor Makefile *.go glide.*
+	rm -rf src Makefile

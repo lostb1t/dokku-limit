@@ -4,7 +4,7 @@ import (
 	"os"
 	"fmt"
 	"strings"
-	resource "github.com/sarendsen/dokku-limit/pkg/resource"
+	resource "github.com/sarendsen/dokku-limit/src/resource"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"os"
-	limit "github.com/sarendsen/dokku-limit/pkg/limit"
+	limit "github.com/sarendsen/dokku-limit/src/limit"
 )
 
 // set the given entries to the specified environment

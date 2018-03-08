@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	limit "github.com/sarendsen/dokku-limit/pkg/limit"
+	limit "github.com/sarendsen/dokku-limit/src/limit"
 	columnize "github.com/ryanuber/columnize"
 )
 
