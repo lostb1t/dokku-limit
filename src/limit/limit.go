@@ -1,187 +1,181 @@
 package config
 
 import (
-    "fmt"
-    "strings"
-    columnize "github.com/ryanuber/columnize"
-    "github.com/dokku/dokku/plugins/common"
-    resource "github.com/sarendsen/dokku-limit/src/resource"
+	"fmt"
+	"github.com/dokku/dokku/plugins/common"
+	columnize "github.com/ryanuber/columnize"
+	resource "github.com/sarendsen/dokku-limit/src/resource"
+	"strings"
 )
 
-
 func CommandSet(args []string, noRestart bool) error {
-    appName, procName := getCommonArgs(args)
-    new_limits := resource.Parse(args[2:])
+	appName, procName := getCommonArgs(args)
+	new_limits := resource.Parse(args[2:])
 
-    // Check if process exists.
-    app_processes := resource.GetAppProcs(appName)
-    if !app_processes[procName] {
-        common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
-    }
-    
-    // Load current resource limits or initiate new.
-    limits := resource.LoadForApp(appName)
-    if limits == nil {
-        limits = resource.Limits{}
-    }
+	// Check if process exists.
+	app_processes := resource.GetAppProcs(appName)
+	if !app_processes[procName] {
+		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
+	}
 
-    if limits[procName] == nil {
-        limits[procName] = resource.Defaults()
-    }
+	// Load current resource limits or initiate new.
+	limits := resource.LoadForApp(appName)
+	if limits == nil {
+		limits = resource.Limits{}
+	}
 
-    // Set new limits
-    for typ, limit := range new_limits {
-        limits[procName][typ] = limit
-    }
+	if limits[procName] == nil {
+		limits[procName] = resource.Defaults()
+	}
 
-    limits.SaveToApp(appName)
+	// Set new limits
+	for typ, limit := range new_limits {
+		limits[procName][typ] = limit
+	}
 
-    // todo print new limits
-    common.LogInfo1(fmt.Sprint("New limits set"))
+	limits.SaveToApp(appName)
 
-    if !noRestart {
-        if !common.IsDeployed(appName) {
-            common.LogFail("App has not been deployed, cannot restart.")
-        }
-        triggerRestart(appName)
-    }
+	// todo print new limits
+	common.LogInfo1(fmt.Sprint("New limits set"))
 
-    return nil
+	if !noRestart {
+		if !common.IsDeployed(appName) {
+			common.LogFail("App has not been deployed, cannot restart.")
+		}
+		triggerRestart(appName)
+	}
+
+	return nil
 }
-
 
 func CommandUnSet(args []string, noRestart bool) error {
-    appName, procName := getCommonArgs(args)
+	appName, procName := getCommonArgs(args)
 
-    types := make(map[resource.Type]bool)
-    for _, typName := range args[2:] {
-        typ, ok := resource.ToType(typName)
-        if ok {
-            types[typ] = false
-        }
-    }
-    
-    limits := resource.LoadForApp(appName)
-    if limits == nil {
-        common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", appName))
-        return nil
-    }
+	types := make(map[resource.Type]bool)
+	for _, typName := range args[2:] {
+		typ, ok := resource.ToType(typName)
+		if ok {
+			types[typ] = false
+		}
+	}
 
-    resources := limits[procName]
-    if resources == nil {
-        common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", procName))
-        return nil
-    }
+	limits := resource.LoadForApp(appName)
+	if limits == nil {
+		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", appName))
+		return nil
+	}
 
-    // Unset limits
-    var restart bool = false
-    for typ, _ := range types {
-        if _, ok := resources[typ]; ok {
-            common.LogInfo1(fmt.Sprintf("Unsetting \"%s\"", typ))
-            delete(resources, typ)
-            restart = true
-        }
-    }
+	resources := limits[procName]
+	if resources == nil {
+		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", procName))
+		return nil
+	}
 
-    limits.SaveToApp(appName)
+	// Unset limits
+	var restart bool = false
+	for typ, _ := range types {
+		if _, ok := resources[typ]; ok {
+			common.LogInfo1(fmt.Sprintf("Unsetting \"%s\"", typ))
+			delete(resources, typ)
+			restart = true
+		}
+	}
 
-    // todo print new limits
+	limits.SaveToApp(appName)
 
-    if !noRestart && restart {
-        if !common.IsDeployed(appName) {
-            common.LogFail("App has not been deployed, cannot restart.")
-        }
-        triggerRestart(appName)
-    }
+	// todo print new limits
 
-    return nil
+	if !noRestart && restart {
+		if !common.IsDeployed(appName) {
+			common.LogFail("App has not been deployed, cannot restart.")
+		}
+		triggerRestart(appName)
+	}
+
+	return nil
 }
-
 
 func CommandReport(args []string) {
-    apps := make(map[string]resource.Limits)
+	apps := make(map[string]resource.Limits)
 
-    if len(args) == 1 {
-        appName := args[0]
-        verifyAppName(appName)
-        apps[appName] = resource.LoadForApp(appName)
-    } else {
-        appNames, _ := common.DokkuApps()
-        for _, appName := range appNames {
-            apps[appName] = resource.LoadForApp(appName)
-        }
-    }
+	if len(args) == 1 {
+		appName := args[0]
+		verifyAppName(appName)
+		apps[appName] = resource.LoadForApp(appName)
+	} else {
+		appNames, _ := common.DokkuApps()
+		for _, appName := range appNames {
+			apps[appName] = resource.LoadForApp(appName)
+		}
+	}
 
-    if apps == nil {
-        fmt.Println("No limits set")
-    }
+	if apps == nil {
+		fmt.Println("No limits set")
+	}
 
-    // todo: better looking formatting
-    for appName, limits := range apps {
-        for procName, resources := range limits {
-            common.LogInfo2(appName + " limits")
-            fmt.Println(formatLimits(procName, resources))
-        }
-    }
+	// todo: better looking formatting
+	for appName, limits := range apps {
+		for procName, resources := range limits {
+			common.LogInfo2(appName + " limits")
+			fmt.Println(formatLimits(procName, resources))
+		}
+	}
 }
-
 
 // Helpers
 
 func formatLimits(procName string, resources resource.Resources) string {
-    config := columnize.DefaultConfig()
-    config.Delim = "|"
-    config.Empty = "-"
+	config := columnize.DefaultConfig()
+	config.Delim = "|"
+	config.Empty = "-"
 
-    header := make([]string, 0, len(resource.ResourceTypes))
-    limits := make([]string, 0, len(resource.ResourceTypes))
-    for _, typ := range resource.ResourceTypes {
-        header = append(header, string(typ))
-        if r, ok := resources[typ]; ok {
-            limits = append(limits, resource.Format(typ, r))
-        } else {
-            limits = append(limits, "")
-        }
-    }
+	header := make([]string, 0, len(resource.ResourceTypes))
+	limits := make([]string, 0, len(resource.ResourceTypes))
+	for _, typ := range resource.ResourceTypes {
+		header = append(header, string(typ))
+		if r, ok := resources[typ]; ok {
+			limits = append(limits, resource.Format(typ, r))
+		} else {
+			limits = append(limits, "")
+		}
+	}
 
-    content := []string{
-        strings.Join(header, config.Delim),
-        strings.Join(limits, config.Delim),
-    }
-    return columnize.Format(content, config)
+	content := []string{
+		strings.Join(header, config.Delim),
+		strings.Join(limits, config.Delim),
+	}
+	return columnize.Format(content, config)
 }
-
 
 func triggerRestart(appName string) {
-    common.LogInfo1(fmt.Sprintf("Restarting app %s", appName))
-    if err := common.PlugnTrigger("app-restart", appName); err != nil {
-        common.LogWarn(fmt.Sprintf("Failure while restarting app: %s", err))
-    }
+	common.LogInfo1(fmt.Sprintf("Restarting app %s", appName))
+	if err := common.PlugnTrigger("app-restart", appName); err != nil {
+		common.LogWarn(fmt.Sprintf("Failure while restarting app: %s", err))
+	}
 }
 
-func getCommonArgs(args []string) (appName string, procName string)  {
-    if len(args) == 0 {
-        common.LogFail("Please specify an app")
-    }
+func getCommonArgs(args []string) (appName string, procName string) {
+	if len(args) == 0 {
+		common.LogFail("Please specify an app")
+	}
 
-    appName = args[0]
-    verifyAppName(appName)
+	appName = args[0]
+	verifyAppName(appName)
 
-    if len(args) == 1 {
-        common.LogFail("Please specify an process")
-    }
-    if len(args) == 2 {
-        common.LogFail("Please specify at least 1 resource")
-    }
-    procName = args[1]
+	if len(args) == 1 {
+		common.LogFail("Please specify an process")
+	}
+	if len(args) == 2 {
+		common.LogFail("Please specify at least 1 resource")
+	}
+	procName = args[1]
 
-    return appName, procName
+	return appName, procName
 }
-
 
 func verifyAppName(appName string) {
-    err := common.VerifyAppName(appName)
-    if err != nil {
-        common.LogFail(err.Error())
-    }
+	err := common.VerifyAppName(appName)
+	if err != nil {
+		common.LogFail(err.Error())
+	}
 }

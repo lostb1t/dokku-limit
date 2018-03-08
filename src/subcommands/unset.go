@@ -2,8 +2,8 @@ package main
 
 import (
 	"flag"
-	"os"
 	limit "github.com/sarendsen/dokku-limit/src/limit"
+	"os"
 )
 
 func main() {
