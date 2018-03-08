@@ -35,8 +35,8 @@ func CommandSet(args []string, noRestart bool) error {
 
 	limits.SaveToApp(appName)
 
-	// todo print new limits
-	common.LogInfo1(fmt.Sprint("New limits set"))
+	common.LogInfo1("Limits set")
+	common.LogVerbose(formatLimits(procName, limits[procName]))
 
 	if !noRestart {
 		if !common.IsDeployed(appName) {
@@ -83,7 +83,8 @@ func CommandUnSet(args []string, noRestart bool) error {
 
 	limits.SaveToApp(appName)
 
-	// todo print new limits
+	common.LogInfo1("Limits unset")
+	common.LogVerbose(formatLimits(procName, resources))
 
 	if !noRestart && restart {
 		if !common.IsDeployed(appName) {
@@ -113,11 +114,10 @@ func CommandReport(args []string) {
 		fmt.Println("No limits set")
 	}
 
-	// todo: better looking formatting
 	for appName, limits := range apps {
 		for procName, resources := range limits {
 			common.LogInfo2(appName + " limits")
-			fmt.Println(formatLimits(procName, resources))
+			fmt.Println(formatLimitsTable(procName, resources))
 		}
 	}
 }
@@ -125,6 +125,21 @@ func CommandReport(args []string) {
 // Helpers
 
 func formatLimits(procName string, resources resource.Resources) string {
+	limits := make([]string, 0, len(resource.ResourceTypes))
+
+	for _, typ := range resource.ResourceTypes {
+		if r, ok := resources[typ]; ok {
+			limits = append(limits, fmt.Sprint(string(typ), ": ", resource.Format(typ, r)))
+		} else {
+			limits = append(limits, fmt.Sprint(string(typ), ": ", "-"))
+		}
+	}
+
+	return strings.Join(limits, " ")
+}
+
+
+func formatLimitsTable(procName string, resources resource.Resources) string {
 	config := columnize.DefaultConfig()
 	config.Delim = "|"
 	config.Empty = "-"
@@ -146,6 +161,7 @@ func formatLimits(procName string, resources resource.Resources) string {
 	}
 	return columnize.Format(content, config)
 }
+
 
 func triggerRestart(appName string) {
 	common.LogInfo1(fmt.Sprintf("Restarting app %s", appName))
