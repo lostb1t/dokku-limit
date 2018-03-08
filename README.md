@@ -5,7 +5,7 @@ Currently supports setting limit's for memory and CPU per process type.
 
 ## requirements
 
-- dokku 0.4.x+
+- dokku 0.9.x+
 - docker 1.8.x
 
 ## installation
