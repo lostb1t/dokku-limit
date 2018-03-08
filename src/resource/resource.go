@@ -52,8 +52,8 @@ type Limits map[string]Resources
 func (l Limits) SaveToApp(appName string) error {
 	cleanLimits(l)
 	filePath := LimitFilePath(appName)
-	rJson, _ := yaml.Marshal(l)
-	err := ioutil.WriteFile(filePath, rJson, 0644)
+	raw, _ := yaml.Marshal(l)
+	err := ioutil.WriteFile(filePath, raw, 0644)
 	return err
 }
 
