@@ -29,3 +29,6 @@ hooks:
 
 clean:
 	rm -rf commands subcommands docker-args-deploy
+
+src-clean:
+	rm -rf .gitignore cmd pkg vendor Makefile *.go glide.*
