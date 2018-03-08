@@ -1,0 +1,10 @@
+support update trigger
+remove src files and others after install
+Support unsetting resource limits
+
+
+nice to haves/future/milestones
+
+Add file descriptors limit
+can we limit services?
+support custom yml file instaed of using cli
