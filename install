@@ -4,4 +4,4 @@ set -eo pipefail; [[ $DOKKU_TRACE ]] && set -x
 cd $(dirname "$0")
 make build-in-docker || exit 1
 make src-clean || exit 1
-echo "installed dokku limit plugin"
+echo "installed/updated dokku limit plugin"
