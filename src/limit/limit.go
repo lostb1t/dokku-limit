@@ -36,6 +36,7 @@ func CommandSet(args []string, noRestart bool) error {
 	limits.SaveToApp(appName)
 
 	// todo print new limits
+	common.LogInfo1(fmt.Sprint("New limits set"))
 
 	if !noRestart {
 		if !common.IsDeployed(appName) {

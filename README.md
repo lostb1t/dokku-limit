@@ -43,7 +43,7 @@ This guarantees the process uses at most 50% of CPU every second.
 # Set cpu to 50% and memory to 500 MB for process "web"
 dokku limit:set my_app web cpu=50 memory=500m
 
-# Unset cpu for process "web"
+# Unset cpu limit for process "web"
 dokku limit:unset my_app web cpu
 
 # Show all resource limits
