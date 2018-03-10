@@ -17,11 +17,13 @@ type Type string
 const (
 	TypeMemory Type = "memory"
 	TypeCPU    Type = "cpu"
+	TypeTempDisk Type = "temp_disk"
 )
 
 var ResourceTypes = []Type{
 	TypeMemory,
 	TypeCPU,
+	TypeTempDisk,
 }
 
 // TODO: Load defaults from globals
@@ -59,7 +61,7 @@ func (l Limits) SaveToApp(appName string) error {
 
 func Format(typ Type, limit int64) string {
 	switch typ {
-	case TypeMemory:
+	case TypeMemory, TypeTempDisk:
 		return units.BytesSize(float64(limit))
 	case TypeCPU:
 		return fmt.Sprintf("%d%%", limit)
@@ -76,6 +78,8 @@ func FormatDocker(typ Type, limit int64) string {
 		numCPU := runtime.NumCPU()
 		cpus := (float64(numCPU) / float64(100) * float64(limit))
 		return fmt.Sprintf("--cpus=\"%.2g\"", cpus)
+	case TypeTempDisk:
+		return fmt.Sprintf("--storage-opt size=%d", limit)
 	}
 	return ""
 }
@@ -86,6 +90,8 @@ func ToType(s string) (Type, bool) {
 		return TypeMemory, true
 	case string(TypeCPU):
 		return TypeCPU, true
+	case string(TypeTempDisk):
+		return TypeTempDisk, true
 	default:
 		return Type(""), false
 	}
@@ -113,7 +119,7 @@ func Parse(limits []string) Resources {
 
 func ParseLimit(typ Type, s string) (int64, error) {
 	switch typ {
-	case TypeMemory:
+	case TypeMemory, TypeTempDisk:
 		return units.RAMInBytes(s)
 	case TypeCPU:
 		val, err := units.FromHumanSize(s)
