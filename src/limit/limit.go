@@ -35,15 +35,21 @@ func CommandSet(args []string, noRestart bool) error {
 
 	limits.SaveToApp(appName)
 
+	if common.IsDeployed(appName) {
+		gitGcCmd := common.NewShellCmd("docker update " + strings.Join(resources.DockerOptions()))
+		common.LogInfo1("docker update " + strings.Join(resources.DockerOptions()))
+		gitGcCmd.Execute()
+	}
+
 	common.LogInfo1("Limits set")
 	common.LogVerbose(formatLimits(procName, limits[procName]))
 
-	if !noRestart {
-		if !common.IsDeployed(appName) {
-			common.LogFail("App has not been deployed, cannot restart.")
-		}
-		triggerRestart(appName)
-	}
+	// if !noRestart {
+	// 	if !common.IsDeployed(appName) {
+	// 		common.LogFail("App has not been deployed, cannot restart.")
+	// 	}
+	// 	triggerRestart(appName)
+	// }
 
 	return nil
 }
