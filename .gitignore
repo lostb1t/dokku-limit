@@ -2,3 +2,4 @@
 /commands
 /subcommands/*
 docker-args-deploy
+test.go

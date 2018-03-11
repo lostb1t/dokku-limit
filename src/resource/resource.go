@@ -3,6 +3,7 @@ package resource
 import (
 	"fmt"
 	units "github.com/docker/go-units"
+	"github.com/pbnjay/memory"
 	"github.com/dokku/dokku/plugins/common"
 	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v2"
@@ -29,7 +30,7 @@ var defaults = Resources{}
 
 type Resources map[Type]int64
 
-// Returns formatted docker arguments
+// returns formatted docker arguments
 func (r Resources) DockerOptions() []string {
 	args := make([]string, len(r))
 
@@ -46,9 +47,17 @@ func Defaults() Resources {
 	return r
 }
 
+// returns the system defaults
+func SystemDefaults() Resources {
+	return Resources{
+		TypeMemory: memory.TotalMemory(),
+		TypeCPU: runtime.NumCPU(),
+	}
+}
+
 type Limits map[string]Resources
 
-// Save limits
+// save limits
 func (l Limits) SaveToApp(appName string) error {
 	cleanLimits(l)
 	filePath := LimitFilePath(appName)

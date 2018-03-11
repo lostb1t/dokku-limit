@@ -1,8 +1,8 @@
-Support unsetting resource limits
-remove limits when a process does not exist anymore? or maybe just dont show/use it
 
 nice to haves/future/milestones
 
+use docker update when container is running or exists.
+remove limits when a process does not exist anymore? or maybe just dont show/use it
 Add file descriptors limit
 can we limit services?
 support custom yml file instaed of using cli
