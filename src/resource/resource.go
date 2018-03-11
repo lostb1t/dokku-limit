@@ -50,8 +50,8 @@ func Defaults() Resources {
 // returns the system defaults
 func SystemDefaults() Resources {
 	return Resources{
-		TypeMemory: memory.TotalMemory(),
-		TypeCPU: uint64(runtime.NumCPU()),
+		TypeMemory: int64(memory.TotalMemory()),
+		TypeCPU: int64(runtime.NumCPU()),
 	}
 }
 
