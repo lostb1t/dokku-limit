@@ -51,7 +51,7 @@ func Defaults() Resources {
 func SystemDefaults() Resources {
 	return Resources{
 		TypeMemory: memory.TotalMemory(),
-		TypeCPU: runtime.NumCPU(),
+		TypeCPU: float64(runtime.NumCPU()),
 	}
 }
 
