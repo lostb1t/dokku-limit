@@ -33,10 +33,13 @@ func CommandSet(args []string, noRestart bool) error {
 		limits[procName][typ] = limit
 	}
 
+	// make sure all resource types are set
+	resource.SetDefaults(limits[procName])
+
 	limits.SaveToApp(appName)
 
 	common.LogInfo1("Limits set")
-	common.LogVerbose(formatLimits(procName, limits[procName]))
+	common.LogVerbose(formatLimits(limits[procName]))
 
 	if !noRestart {
 		if !common.IsDeployed(appName) {
@@ -84,7 +87,7 @@ func CommandUnSet(args []string, noRestart bool) error {
 	limits.SaveToApp(appName)
 
 	common.LogInfo1("Limits unset")
-	common.LogVerbose(formatLimits(procName, resources))
+	common.LogVerbose(formatLimits(resources))
 
 	if !noRestart && restart {
 		if !common.IsDeployed(appName) {
@@ -116,10 +119,17 @@ func CommandReport(args []string) {
 
 	for appName, limits := range apps {
 		for procName, resources := range limits {
-			common.LogInfo2(appName + " limits")
-			fmt.Println(formatLimitsTable(procName, resources))
+			common.LogInfo2(appName + " " + procName + " limits")
+			fmt.Println(formatLimitsTable(resources))
 		}
 	}
+}
+
+
+func CommandReportDefault(args []string) {
+	defaultResources := resource.Defaults()
+	common.LogInfo2("Default limits")
+	fmt.Println(formatLimitsTable(defaultResources))
 }
 
 
@@ -138,13 +148,14 @@ func CommandSetDefault(args []string) error {
 		defaultResources[typ] = resource
 	}
 
+	// save new defaults
 	err := resource.SaveDefaults(defaultResources)
 	if err != nil {
 		common.LogFail(err.Error())
 	}
 
 	common.LogInfo1("Default limits saved")
-	common.LogInfo1("You must restart your app's for new defaults to take effect")
+	common.LogInfo1("You must restart your app(s) for new defaults to take effect")
 
 	return nil
 }
@@ -152,7 +163,7 @@ func CommandSetDefault(args []string) error {
 
 // Helpers
 
-func formatLimits(procName string, resources resource.Resources) string {
+func formatLimits(resources resource.Resources) string {
 	limits := make([]string, 0, len(resource.ResourceTypes))
 
 	for _, typ := range resource.ResourceTypes {
@@ -167,7 +178,7 @@ func formatLimits(procName string, resources resource.Resources) string {
 }
 
 
-func formatLimitsTable(procName string, resources resource.Resources) string {
+func formatLimitsTable(resources resource.Resources) string {
 	config := columnize.DefaultConfig()
 	config.Delim = "|"
 	config.Empty = "-"

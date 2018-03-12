@@ -24,14 +24,14 @@ func main() {
 
 	limits := resource.LoadForApp(appName)
 	if limits == nil {
-		fmt.Printf("%s", stdin)
-		return
+		limits = resource.Limits{
+			procName: resource.Defaults(),
+		}
 	}
 
 	resources, ok := limits[procName]
 	if !ok {
-		fmt.Printf("%s", stdin)
-		return
+		limits[procName] = resource.Defaults()
 	}
 
 	args := resources.DockerOptions()

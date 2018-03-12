@@ -37,7 +37,31 @@ func (r Resources) DockerOptions() []string {
 }
 
 func Defaults() Resources {
-	return LoadDefaults()
+	defaults := LoadDefaults()
+	if defaults == nil {
+		defaults = SystemDefaults()
+	}
+	return defaults
+}
+
+func SetDefaults(r Resources) {
+	defaults := Defaults()
+	if r == nil {
+		r = defaults
+	}
+	for typ, limit := range defaults {
+		if _, ok := r[typ]; !ok  {
+			r[typ] = limit
+		}
+	}
+}
+
+// returns starting defaults
+func SystemDefaults() Resources {
+	return Resources{
+		TypeMemory: 1073741824,	// 1GB
+		TypeCPU: int64(100),
+	}
 }
 
 type Limits map[string]Resources
@@ -136,6 +160,23 @@ func DefaultsFilePath() (filePath string) {
 	return strings.Join([]string{libroot, "data", "limit", "RESOURCES.yml"}, "/")
 }
 
+
+// load app limits merged with the default
+// func LoadMergedLimits(appName string) Limits {
+// 	limits := LoadForApp(appName)
+// 	defaults := LoadDefaults()
+// 	return limits
+// }
+
+// return current limits for an app
+// func GetAppLimits(appName string) Limits {
+// 	limits := LoadForApp(appName)
+// 	if limits == nil {
+// 		procs := GetAppProcs(appName)
+// 	}
+// }
+
+// load limits from resource app file
 func LoadForApp(appName string) Limits {
 	filePath := LimitFilePath(appName)
 
@@ -162,7 +203,7 @@ func LoadDefaults() Resources {
 	resources := Resources{}
 
 	if !common.FileExists(filePath) {
-		return resources
+		return nil
 	}
 
 	raw, err := ioutil.ReadFile(filePath)
