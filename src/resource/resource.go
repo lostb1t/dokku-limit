@@ -24,9 +24,6 @@ var ResourceTypes = []Type{
 	TypeCPU,
 }
 
-// TODO: Load defaults from globals
-var defaults = Resources{}
-
 type Resources map[Type]int64
 
 // Returns formatted docker arguments
@@ -41,9 +38,7 @@ func (r Resources) DockerOptions() []string {
 }
 
 func Defaults() Resources {
-	r := Resources{}
-	copier.Copy(&r, &defaults)
-	return r
+	return LoadDefaults()
 }
 
 type Limits map[string]Resources
@@ -137,6 +132,11 @@ func LimitFilePath(appName string) (filePath string) {
 	return strings.Join([]string{appRoot, "RESOURCES.yml"}, "/")
 }
 
+func DefaultsFilePath() string {
+	libroot := common.MustGetEnv("DOKKU_LIB_ROOT")
+	return strings.Join([]string{libroot, "data", "limit", "RESOURCES.yml"}, "/")
+}
+
 func LoadForApp(appName string) Limits {
 	filePath := LimitFilePath(appName)
 
@@ -155,6 +155,25 @@ func LoadForApp(appName string) Limits {
 	cleanLimits(limits)
 
 	return limits
+}
+
+// load default resources
+func LoadDefaults() {
+	filePath := DefaultsFilePath()
+	resources := Resources{}
+
+	if !common.FileExists(filePath) {
+		return nil
+	}
+
+	raw, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		common.LogFail(err.Error())
+	}
+
+	err = yaml.Unmarshal(raw, &resources)
+
+	return resources
 }
 
 // Get the processes for an app
