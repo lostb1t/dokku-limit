@@ -28,14 +28,15 @@ func main() {
 		return
 	}
 
-	if limits[procName] == nil {
+	resources, ok := limits[procName]
+	if !ok {
 		fmt.Printf("%s", stdin)
 		return
 	}
 
-	args := resource.DockerOptions(limits[procName])
+	args := resources.DockerOptions()
 	if args != nil {
-		fmt.Println(stdin, strings.Join(args, " "))
+		fmt.Print(stdin, strings.Join(args, " "))
 	} else {
 		fmt.Printf("%s", stdin)
 	}
