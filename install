@@ -5,4 +5,5 @@ cd $(dirname "$0")
 make build-in-docker || exit 1
 make src-clean || exit 1
 mkdir -p "${DOKKU_LIB_ROOT}/data/limit"
+chown -R dokku:dokku "${DOKKU_LIB_ROOT}/data/limit"
 echo "installed/updated dokku limit plugin"

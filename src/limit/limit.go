@@ -138,7 +138,10 @@ func CommandSetDefault(args []string) error {
 		defaultResources[typ] = resource
 	}
 
-	resource.SaveDefaults(defaultResources)
+	err := resource.SaveDefaults(defaultResources)
+	if err != nil {
+		common.LogFail(err.Error())
+	}
 
 	common.LogInfo1("Default limits saved")
 	common.LogInfo1("You must restart your app's for new defaults to take effect")
