@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	resource "github.com/sarendsen/dokku-limit/src/resource"
 	"os"
+	"fmt"
 	"strings"
+	"bufio"
+	resource "github.com/sarendsen/dokku-limit/src/resource"
 )
 
 func main() {
@@ -24,19 +24,18 @@ func main() {
 
 	limits := resource.LoadForApp(appName)
 	if limits == nil {
-		limits = resource.Limits{
-			procName: resource.Defaults(),
-		}
+		fmt.Printf("%s", stdin)
+		return
 	}
 
-	resources, ok := limits[procName]
-	if !ok {
-		limits[procName] = resource.Defaults()
+	if limits[procName] == nil {
+		fmt.Printf("%s", stdin)
+		return
 	}
 
-	args := resources.DockerOptions()
+	args := limits.DockerOptions(procName)
 	if args != nil {
-		fmt.Print(stdin, strings.Join(args, " "))
+		fmt.Println(stdin, strings.Join(args, " "))
 	} else {
 		fmt.Printf("%s", stdin)
 	}
