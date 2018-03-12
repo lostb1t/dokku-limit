@@ -123,42 +123,22 @@ func CommandReport(args []string) {
 }
 
 
-func CommandSetDefault(args []string, noRestart bool) error {
-	appName, procName := getCommonArgs(args)
-	new_limits := resource.Parse(args[2:])
+func CommandSetDefault(args []string) error {
+	resources := resource.Parse(args)
 
-	// Check if process exists.
-	app_processes := resource.GetAppProcs(appName)
-	if !app_processes[procName] {
-		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
+	// Load current defaults
+	defaultResources := resource.Defaults()
+
+
+	// Set new defaults
+	for typ, resource := range resources {
+		defaultResources][typ] = resource
 	}
 
-	// Load current resource limits or initiate new.
-	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		limits = resource.Limits{}
-	}
+	resource.SaveDefaults(defaultResources)
 
-	if limits[procName] == nil {
-		limits[procName] = resource.Defaults()
-	}
-
-	// Set new limits
-	for typ, limit := range new_limits {
-		limits[procName][typ] = limit
-	}
-
-	limits.SaveToApp(appName)
-
-	common.LogInfo1("Limits set")
-	common.LogVerbose(formatLimits(procName, limits[procName]))
-
-	if !noRestart {
-		if !common.IsDeployed(appName) {
-			common.LogFail("App has not been deployed, cannot restart.")
-		}
-		triggerRestart(appName)
-	}
+	common.LogInfo1("Default limits saved")
+	common.LogInfo1("You must restart your app's manual for new defaults to take effect")
 
 	return nil
 }
