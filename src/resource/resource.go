@@ -162,7 +162,7 @@ func LoadDefaults() Resources {
 	resources := Resources{}
 
 	if !common.FileExists(filePath) {
-		return nil
+		return resources
 	}
 
 	raw, err := ioutil.ReadFile(filePath)

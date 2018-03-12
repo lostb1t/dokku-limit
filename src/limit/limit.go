@@ -124,6 +124,10 @@ func CommandReport(args []string) {
 
 
 func CommandSetDefault(args []string) error {
+	if len(args) == 0 {
+		common.LogFail("Please specify at least 1 resource")
+	}
+
 	resources := resource.Parse(args)
 
 	// Load current defaults
@@ -137,7 +141,7 @@ func CommandSetDefault(args []string) error {
 	resource.SaveDefaults(defaultResources)
 
 	common.LogInfo1("Default limits saved")
-	common.LogInfo1("You must restart your app's manual for new defaults to take effect")
+	common.LogInfo1("You must restart your app's for new defaults to take effect")
 
 	return nil
 }

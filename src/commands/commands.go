@@ -20,7 +20,7 @@ Additional commands:`
     limit (<app>), Pretty-print limits
     limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
     limit:unset <app> <proc> [memory cpu] [--no-restart], Unset one or more limits for app/process pair
-    limit:set-default [memory=VALUE cpu=VALUE], Set default resources. After setting you have to restart your app's manual to take effect.
+    limit:set-default [memory=VALUE cpu=VALUE], Set default resources. App's need to be restarted to take effect.
 `
 )
 
