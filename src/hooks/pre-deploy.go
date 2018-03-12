@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	limit "github.com/sarendsen/dokku-limit/src/limit"
 	resource "github.com/sarendsen/dokku-limit/src/resource"
 	"github.com/dokku/dokku/plugins/common"
 	"os"
@@ -27,8 +28,10 @@ func main() {
 		}
 	}
 
-	// todo remove old procs from limits file?
-	// todo print limits
+	common.LogInfo1(fmt.Sprintf("Resource limits"))
+	for procName, _ := range processes {
+		common.LogInfo1(fmt.Sprintf("%s %s", procName, limit.FormatLimits(limits[procName])))
+	}
 
 	if save {
 		limits.SaveToApp(appName)

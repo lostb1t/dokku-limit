@@ -56,7 +56,7 @@ func SetDefaults(r Resources) {
 	}
 }
 
-// returns starting defaults
+// return starting defaults
 func SystemDefaults() Resources {
 	return Resources{
 		TypeMemory: 1073741824,	// 1GB
@@ -160,22 +160,6 @@ func DefaultsFilePath() (filePath string) {
 	return strings.Join([]string{libroot, "data", "limit", "RESOURCES.yml"}, "/")
 }
 
-
-// load app limits merged with the default
-// func LoadMergedLimits(appName string) Limits {
-// 	limits := LoadForApp(appName)
-// 	defaults := LoadDefaults()
-// 	return limits
-// }
-
-// return current limits for an app
-// func GetAppLimits(appName string) Limits {
-// 	limits := LoadForApp(appName)
-// 	if limits == nil {
-// 		procs := GetAppProcs(appName)
-// 	}
-// }
-
 // load limits from resource app file
 func LoadForApp(appName string) Limits {
 	filePath := LimitFilePath(appName)
@@ -197,7 +181,7 @@ func LoadForApp(appName string) Limits {
 	return limits
 }
 
-// load default resources
+// load default resource limits
 func LoadDefaults() Resources {
 	filePath := DefaultsFilePath()
 	resources := Resources{}
@@ -216,7 +200,7 @@ func LoadDefaults() Resources {
 	return resources
 }
 
-// Save default resources
+// Save default resource limits
 func SaveDefaults(r Resources) error {
 	filePath := DefaultsFilePath()
 	raw, _ := yaml.Marshal(r)

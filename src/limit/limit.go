@@ -39,57 +39,9 @@ func CommandSet(args []string, noRestart bool) error {
 	limits.SaveToApp(appName)
 
 	common.LogInfo1("Limits set")
-	common.LogVerbose(formatLimits(limits[procName]))
+	common.LogVerbose(FormatLimits(limits[procName]))
 
 	if !noRestart {
-		if !common.IsDeployed(appName) {
-			common.LogFail("App has not been deployed, cannot restart.")
-		}
-		triggerRestart(appName)
-	}
-
-	return nil
-}
-
-func CommandUnSet(args []string, noRestart bool) error {
-	appName, procName := getCommonArgs(args)
-
-	types := make(map[resource.Type]bool)
-	for _, typName := range args[2:] {
-		typ, ok := resource.ToType(typName)
-		if ok {
-			types[typ] = false
-		}
-	}
-
-	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", appName))
-		return nil
-	}
-
-	resources := limits[procName]
-	if resources == nil {
-		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", procName))
-		return nil
-	}
-
-	// Unset limits
-	var restart bool = false
-	for typ, _ := range types {
-		if _, ok := resources[typ]; ok {
-			common.LogInfo1(fmt.Sprintf("Unsetting \"%s\"", typ))
-			delete(resources, typ)
-			restart = true
-		}
-	}
-
-	limits.SaveToApp(appName)
-
-	common.LogInfo1("Limits unset")
-	common.LogVerbose(formatLimits(resources))
-
-	if !noRestart && restart {
 		if !common.IsDeployed(appName) {
 			common.LogFail("App has not been deployed, cannot restart.")
 		}
@@ -105,20 +57,27 @@ func CommandReport(args []string) {
 	if len(args) == 1 {
 		appName := args[0]
 		verifyAppName(appName)
-		apps[appName] = resource.LoadForApp(appName)
+		limits := resource.LoadForApp(appName)
+		if limits != nil {
+			apps[appName] = resource.LoadForApp(appName)
+		}
 	} else {
 		appNames, _ := common.DokkuApps()
 		for _, appName := range appNames {
-			apps[appName] = resource.LoadForApp(appName)
+			limits := resource.LoadForApp(appName)
+			if limits != nil {
+				apps[appName] = resource.LoadForApp(appName)
+			}
 		}
 	}
 
-	if apps == nil {
+	if len(apps) == 0 {
 		fmt.Println("No limits set")
 	}
 
 	for appName, limits := range apps {
 		for procName, resources := range limits {
+			resource.SetDefaults(limits[procName])
 			common.LogInfo2(appName + " " + procName + " limits")
 			fmt.Println(formatLimitsTable(resources))
 		}
@@ -155,7 +114,6 @@ func CommandSetDefault(args []string) error {
 	}
 
 	common.LogInfo1("Default limits saved")
-	common.LogInfo1("You must restart your app(s) for new defaults to take effect")
 
 	return nil
 }
@@ -163,7 +121,7 @@ func CommandSetDefault(args []string) error {
 
 // Helpers
 
-func formatLimits(resources resource.Resources) string {
+func FormatLimits(resources resource.Resources) string {
 	limits := make([]string, 0, len(resource.ResourceTypes))
 
 	for _, typ := range resource.ResourceTypes {
