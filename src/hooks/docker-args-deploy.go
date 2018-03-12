@@ -40,4 +40,5 @@ func main() {
 	} else {
 		fmt.Printf("%s", stdin)
 	}
+	return
 }

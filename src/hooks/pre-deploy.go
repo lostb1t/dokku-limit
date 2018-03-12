@@ -14,7 +14,6 @@ func main() {
 
 	limits := resource.LoadForApp(appName)
 	if limits == nil {
-		common.LogInfo1("No resource limit file detected, creating")
 		limits = resource.Limits{}
 		save = true
 	}

@@ -26,7 +26,7 @@ subcommands/%: src/subcommands/%.go
 
 hooks:
 	go build $(GO_ARGS) -o docker-args-deploy src/hooks/docker-args-deploy.go
-	go build $(GO_ARGS) -o docker-args-deploy src/hooks/pre-deploy.go
+	go build $(GO_ARGS) -o pre-deploy src/hooks/pre-deploy.go
 
 clean:
 	rm -rf commands subcommands docker-args-deploy
