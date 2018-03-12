@@ -1,5 +1,5 @@
 hash: bb9436ce670dfab4579d71022624dd1641ba16fb2753f2677a57759a976bee63
-updated: 2018-03-07T11:48:20.219044+01:00
+updated: 2018-03-12T11:48:22.416745+01:00
 imports:
 - name: github.com/codegangsta/inject
   version: 33e0aa1cb7c019ccc3fbe049a8262a6403d30504
@@ -11,8 +11,6 @@ imports:
   version: 376284381edf6da26180f8f3108b7cbc7d240a92
   subpackages:
   - plugins/common
-- name: github.com/jinzhu/copier
-  version: 6d89066dd0cd179a5f8f06105c9215edb95a69e2
 - name: github.com/ryanuber/columnize
   version: 983d3a5fab1bf04d1b412465d2d9f8430e2e917e
 - name: gopkg.in/yaml.v2

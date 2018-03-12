@@ -4,7 +4,6 @@ import (
 	"fmt"
 	units "github.com/docker/go-units"
 	"github.com/dokku/dokku/plugins/common"
-	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"runtime"
@@ -132,7 +131,7 @@ func LimitFilePath(appName string) (filePath string) {
 	return strings.Join([]string{appRoot, "RESOURCES.yml"}, "/")
 }
 
-func DefaultsFilePath() string {
+func DefaultsFilePath() (filePath string) {
 	libroot := common.MustGetEnv("DOKKU_LIB_ROOT")
 	return strings.Join([]string{libroot, "data", "limit", "RESOURCES.yml"}, "/")
 }
@@ -158,7 +157,7 @@ func LoadForApp(appName string) Limits {
 }
 
 // load default resources
-func LoadDefaults() {
+func LoadDefaults() Resources {
 	filePath := DefaultsFilePath()
 	resources := Resources{}
 
@@ -178,7 +177,7 @@ func LoadDefaults() {
 
 // Save default resources
 func SaveDefaults(r Resources) error {
-	filePath := DefaultsFilePath(appName)
+	filePath := DefaultsFilePath()
 	raw, _ := yaml.Marshal(r)
 	err := ioutil.WriteFile(filePath, raw, 0644)
 	return err

@@ -129,10 +129,9 @@ func CommandSetDefault(args []string) error {
 	// Load current defaults
 	defaultResources := resource.Defaults()
 
-
 	// Set new defaults
 	for typ, resource := range resources {
-		defaultResources][typ] = resource
+		defaultResources[typ] = resource
 	}
 
 	resource.SaveDefaults(defaultResources)
