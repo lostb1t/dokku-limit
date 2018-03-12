@@ -122,6 +122,48 @@ func CommandReport(args []string) {
 	}
 }
 
+
+func CommandSetDefault(args []string, noRestart bool) error {
+	appName, procName := getCommonArgs(args)
+	new_limits := resource.Parse(args[2:])
+
+	// Check if process exists.
+	app_processes := resource.GetAppProcs(appName)
+	if !app_processes[procName] {
+		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
+	}
+
+	// Load current resource limits or initiate new.
+	limits := resource.LoadForApp(appName)
+	if limits == nil {
+		limits = resource.Limits{}
+	}
+
+	if limits[procName] == nil {
+		limits[procName] = resource.Defaults()
+	}
+
+	// Set new limits
+	for typ, limit := range new_limits {
+		limits[procName][typ] = limit
+	}
+
+	limits.SaveToApp(appName)
+
+	common.LogInfo1("Limits set")
+	common.LogVerbose(formatLimits(procName, limits[procName]))
+
+	if !noRestart {
+		if !common.IsDeployed(appName) {
+			common.LogFail("App has not been deployed, cannot restart.")
+		}
+		triggerRestart(appName)
+	}
+
+	return nil
+}
+
+
 // Helpers
 
 func formatLimits(procName string, resources resource.Resources) string {
