@@ -33,7 +33,7 @@ func main() {
 		return
 	}
 
-	args := limits.DockerOptions(procName)
+	args := resource.DockerOptions(limits[procName])
 	if args != nil {
 		fmt.Println(stdin, strings.Join(args, " "))
 	} else {
