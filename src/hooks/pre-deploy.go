@@ -29,6 +29,7 @@ func main() {
 	}
 
 	// todo remove old procs from limits file?
+	// todo print limits
 
 	if save {
 		limits.SaveToApp(appName)
