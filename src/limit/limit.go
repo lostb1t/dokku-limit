@@ -36,9 +36,15 @@ func CommandSet(args []string, noRestart bool) error {
 	limits.SaveToApp(appName)
 
 	if common.IsDeployed(appName) {
-		gitGcCmd := common.NewShellCmd("docker update " + strings.Join(limits[procName].DockerOptions(), " "))
-		common.LogInfo1("docker update " + strings.Join(limits[procName].DockerOptions(), " "))
-		gitGcCmd.Execute()
+		containers, _ := resource.GetContainers(appName)
+		if containers != nil {
+			dockerCmd := common.NewShellCmd(
+				"docker update " + strings.Join(limits[procName].DockerOptions(), " ") + strings.Join(containers[procName]), " ")
+			)
+			//common.LogInfo1("docker update " + strings.Join(limits[procName].DockerOptions(), " "))
+			//dockerCmd.ShowOutput = false
+			dockerCmd.Execute()
+		}
 	}
 
 	common.LogInfo1("Limits set")

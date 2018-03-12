@@ -47,7 +47,7 @@ func Defaults() Resources {
 	return r
 }
 
-// returns the system defaults
+// returns the system defaults aka the max of avaiable resources
 func SystemDefaults() Resources {
 	return Resources{
 		TypeMemory: int64(memory.TotalMemory()),
@@ -187,6 +187,31 @@ func GetAppProcs(appName string) map[string]bool {
 
 	return procs
 }
+
+
+// get all container ids mapped by procName
+func GetContainers(appName string) (map[string][]string, error) {
+	containers := make(map[string][]string)
+	appRoot := AppRoot(appName)
+	files, err := ioutil.ReadDir(appRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, f := range files {
+		if f.Name() == "CONTAINER" {
+			id := common.ReadFirstLine(appRoot + f.Name())
+			containers['web'] = append(containers['web'], id)
+		}
+		else if strings.HasPrefix(f.Name(), "CONTAINER.") {
+			procName := strings.Split(f.Name(), ".")[1]
+			id := common.ReadFirstLine(appRoot + f.Name())
+			containers = append(containers[procName], id)
+		}
+	}
+	return containers, nil
+}
+
 
 func cleanLimits(l Limits) {
 	for procName, resources := range l {
