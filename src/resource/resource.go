@@ -176,6 +176,14 @@ func LoadDefaults() {
 	return resources
 }
 
+// Save default resources
+func SaveDefaults(r Resources) error {
+	filePath := DefaultsFilePath(appName)
+	raw, _ := yaml.Marshal(r)
+	err := ioutil.WriteFile(filePath, raw, 0644)
+	return err
+}
+
 // Get the processes for an app
 func GetAppProcs(appName string) map[string]bool {
 	appRoot := AppRoot(appName)
