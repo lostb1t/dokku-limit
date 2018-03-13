@@ -15,7 +15,7 @@ Currently supports setting limit's for memory and CPU per process type.
 sudo dokku plugin:install https://github.com/sarendsen/dokku-limit.git limit
 ```
 
-On installation you might want to change the default limits that are used for apps/procs. Or set limits on an app base/proc before deploying/restarting.
+On installation you might want to change the default limits. Or set limits for an app/proc pair before deploying/restarting.
 If no limits are yet set (after plugin installation or first time app deployment) or a new procces type is added to an app then the default limits will be used as template.
 See usage on changing the defaults.
 
