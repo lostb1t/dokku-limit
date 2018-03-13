@@ -17,7 +17,7 @@ func main() {
 
 	// sucks but need this because our plugin runs before ps because of the name...
 	// we need the updated SCALE file.
-	// todo: create a pull request for plugn system supporting plugin weights
+	// todo: create a pull request for plugn system supporting plugin weights.
 	pluginRoot := common.MustGetEnv("PLUGIN_PATH")
 	psFile := strings.Join([]string{pluginRoot, "enabled", "ps", "pre-deploy"}, "/")
 	dokkuCmd := common.NewShellCmd(fmt.Sprintf("%s %s %s", psFile, appName, imageTag))
@@ -47,7 +47,6 @@ func main() {
 			save = true
 		}
 	}
-
 
 	for procName, _ := range processes {
 		common.LogInfo1(fmt.Sprintf("%s limits: [%s]", procName, limit.FormatLimits(limits[procName])))
