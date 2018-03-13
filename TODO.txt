@@ -1,8 +1,5 @@
-Support unsetting resource limits
-remove limits when a process does not exist anymore? or maybe just dont show/use it
-
 nice to haves/future/milestones
 
+make a nice table for "limit" command output
 Add file descriptors limit
-can we limit services?
 support custom yml file instaed of using cli
