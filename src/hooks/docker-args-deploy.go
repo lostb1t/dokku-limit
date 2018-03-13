@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
-	resource "github.com/sarendsen/dokku-limit/src/resource"
 	"os"
+	"fmt"
 	"strings"
+	"bufio"
+	resource "github.com/sarendsen/dokku-limit/src/resource"
 )
 
 func main() {
@@ -23,10 +23,6 @@ func main() {
 	procName := os.Args[3]
 
 	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		fmt.Printf("%s", stdin)
-		return
-	}
 
 	resources, ok := limits[procName]
 	if !ok {
@@ -40,4 +36,5 @@ func main() {
 	} else {
 		fmt.Printf("%s", stdin)
 	}
+	return
 }

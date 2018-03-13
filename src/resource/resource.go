@@ -4,7 +4,6 @@ import (
 	"fmt"
 	units "github.com/docker/go-units"
 	"github.com/dokku/dokku/plugins/common"
-	"github.com/jinzhu/copier"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"runtime"
@@ -24,9 +23,6 @@ var ResourceTypes = []Type{
 	TypeCPU,
 }
 
-// TODO: Load defaults from globals
-var defaults = Resources{}
-
 type Resources map[Type]int64
 
 // Returns formatted docker arguments
@@ -41,9 +37,27 @@ func (r Resources) DockerOptions() []string {
 }
 
 func Defaults() Resources {
-	r := Resources{}
-	copier.Copy(&r, &defaults)
-	return r
+	return LoadDefaults()
+}
+
+func SetDefaults(r Resources) {
+	defaults := Defaults()
+	if r == nil {
+		r = defaults
+	}
+	for typ, limit := range defaults {
+		if _, ok := r[typ]; !ok  {
+			r[typ] = limit
+		}
+	}
+}
+
+// return starting defaults
+func SystemDefaults() Resources {
+	return Resources{
+		TypeMemory: 1073741824,	// 1GB
+		TypeCPU: int64(100),
+	}
 }
 
 type Limits map[string]Resources
@@ -137,11 +151,17 @@ func LimitFilePath(appName string) (filePath string) {
 	return strings.Join([]string{appRoot, "RESOURCES.yml"}, "/")
 }
 
+func DefaultsFilePath() (filePath string) {
+	libroot := common.MustGetEnv("DOKKU_LIB_ROOT")
+	return strings.Join([]string{libroot, "data", "limit", "RESOURCES.yml"}, "/")
+}
+
+// load limits from resource app file
 func LoadForApp(appName string) Limits {
 	filePath := LimitFilePath(appName)
 
 	if !common.FileExists(filePath) {
-		return nil
+		return Limits{}
 	}
 
 	raw, err := ioutil.ReadFile(filePath)
@@ -155,6 +175,33 @@ func LoadForApp(appName string) Limits {
 	cleanLimits(limits)
 
 	return limits
+}
+
+// load default resource limits
+func LoadDefaults() Resources {
+	filePath := DefaultsFilePath()
+	resources := Resources{}
+
+	if !common.FileExists(filePath) {
+		return SystemDefaults()
+	}
+
+	raw, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		common.LogFail(err.Error())
+	}
+
+	err = yaml.Unmarshal(raw, &resources)
+
+	return resources
+}
+
+// Save default resource limits
+func SaveDefaults(r Resources) error {
+	filePath := DefaultsFilePath()
+	raw, _ := yaml.Marshal(r)
+	err := ioutil.WriteFile(filePath, raw, 0644)
+	return err
 }
 
 // Get the processes for an app

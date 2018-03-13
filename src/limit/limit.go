@@ -18,12 +18,8 @@ func CommandSet(args []string, noRestart bool) error {
 		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
 	}
 
-	// Load current resource limits or initiate new.
+	// Load current resource limits
 	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		limits = resource.Limits{}
-	}
-
 	if limits[procName] == nil {
 		limits[procName] = resource.Defaults()
 	}
@@ -33,60 +29,15 @@ func CommandSet(args []string, noRestart bool) error {
 		limits[procName][typ] = limit
 	}
 
+	// make sure all resource types are set
+	resource.SetDefaults(limits[procName])
+
 	limits.SaveToApp(appName)
 
-	common.LogInfo1("Limits set")
-	common.LogVerbose(formatLimits(procName, limits[procName]))
+	common.LogInfo1(fmt.Sprintf("limits set for process \"%s\"", procName))
+	common.LogVerbose(FormatLimits(limits[procName]))
 
 	if !noRestart {
-		if !common.IsDeployed(appName) {
-			common.LogFail("App has not been deployed, cannot restart.")
-		}
-		triggerRestart(appName)
-	}
-
-	return nil
-}
-
-func CommandUnSet(args []string, noRestart bool) error {
-	appName, procName := getCommonArgs(args)
-
-	types := make(map[resource.Type]bool)
-	for _, typName := range args[2:] {
-		typ, ok := resource.ToType(typName)
-		if ok {
-			types[typ] = false
-		}
-	}
-
-	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", appName))
-		return nil
-	}
-
-	resources := limits[procName]
-	if resources == nil {
-		common.LogInfo1(fmt.Sprintf("No limits set for \"%s\"", procName))
-		return nil
-	}
-
-	// Unset limits
-	var restart bool = false
-	for typ, _ := range types {
-		if _, ok := resources[typ]; ok {
-			common.LogInfo1(fmt.Sprintf("Unsetting \"%s\"", typ))
-			delete(resources, typ)
-			restart = true
-		}
-	}
-
-	limits.SaveToApp(appName)
-
-	common.LogInfo1("Limits unset")
-	common.LogVerbose(formatLimits(procName, resources))
-
-	if !noRestart && restart {
 		if !common.IsDeployed(appName) {
 			common.LogFail("App has not been deployed, cannot restart.")
 		}
@@ -110,21 +61,52 @@ func CommandReport(args []string) {
 		}
 	}
 
-	if apps == nil {
-		fmt.Println("No limits set")
-	}
-
 	for appName, limits := range apps {
 		for procName, resources := range limits {
-			common.LogInfo2(appName + " limits")
-			fmt.Println(formatLimitsTable(procName, resources))
+			common.LogInfo2(appName + " " + procName + " limits")
+			fmt.Println(formatLimitsTable(resources))
 		}
 	}
 }
 
+
+func CommandReportDefault(args []string) {
+	defaultResources := resource.Defaults()
+	common.LogInfo2("Default limits")
+	fmt.Println(formatLimitsTable(defaultResources))
+}
+
+
+func CommandSetDefault(args []string) error {
+	if len(args) == 0 {
+		common.LogFail("Please specify at least 1 resource")
+	}
+
+	resources := resource.Parse(args)
+
+	// Load current defaults
+	defaultResources := resource.Defaults()
+
+	// Set new defaults
+	for typ, resource := range resources {
+		defaultResources[typ] = resource
+	}
+
+	// save new defaults
+	err := resource.SaveDefaults(defaultResources)
+	if err != nil {
+		common.LogFail(err.Error())
+	}
+
+	common.LogInfo1("Default limits saved")
+
+	return nil
+}
+
+
 // Helpers
 
-func formatLimits(procName string, resources resource.Resources) string {
+func FormatLimits(resources resource.Resources) string {
 	limits := make([]string, 0, len(resource.ResourceTypes))
 
 	for _, typ := range resource.ResourceTypes {
@@ -139,7 +121,7 @@ func formatLimits(procName string, resources resource.Resources) string {
 }
 
 
-func formatLimitsTable(procName string, resources resource.Resources) string {
+func formatLimitsTable(resources resource.Resources) string {
 	config := columnize.DefaultConfig()
 	config.Delim = "|"
 	config.Empty = "-"
