@@ -25,8 +25,8 @@ See usage on changing the defaults.
 ```
 limit (<app>)                                                   Pretty-print app resource limits
 limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart]  Set one or more limits for app/process pair
-limit:default                                                   Pretty-print default resource limits
-limit:set-default [memory=VALUE cpu=VALUE]                      Set default resource limits. These will be used for new apps/procs.
+limit:defaults                                                  Pretty-print default resource limits
+limit:set-defaults [memory=VALUE cpu=VALUE]                     Set default resource limits. These will be used for new apps/procs.
 ```
 
 
@@ -56,9 +56,9 @@ dokku limit
 # Show resource limits for app "my_app"
 dokku limit my_app
 
-# Set cpu to 50% and memory to 500 MB for process "web" as default
-dokku limit:set-default cpu=50 memory=500m
+# Set cpu to 50% and memory to 500 MB as default
+dokku limit:set-defaults cpu=50 memory=500m
 
 # Show default resource limits
-dokku limit:default
+dokku limit:defaults
 ```
