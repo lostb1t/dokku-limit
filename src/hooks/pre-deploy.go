@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	limit "github.com/sarendsen/dokku-limit/src/limit"
 	resource "github.com/sarendsen/dokku-limit/src/resource"
 	"github.com/dokku/dokku/plugins/common"
@@ -15,11 +16,11 @@ func main() {
 	var save bool = false
 
 	// sucks but need this because our plugin runs before ps because of the name...
-	// we need the SCALE file.
-	dokkuCmd := common.NewShellCmd("extract_procfile " + appName + " " + imageTag)
-	dokkuCmd.ShowOutput = false
-	dokkuCmd.Execute()
-	dokkuCmd = common.NewShellCmd("generate_scale_file " + appName + " " + imageTag)
+	// we need the updated SCALE file.
+	// todo: create a pull request for plugn system supporting plugin weights
+	pluginRoot := common.MustGetEnv("PLUGIN_PATH")
+	psFile := strings.Join([]string{pluginRoot, "enabled", "ps", "pre-deploy"}, "/")
+	dokkuCmd := common.NewShellCmd(fmt.Sprintf("%s %s %s", psFile, appName, imageTag))
 	dokkuCmd.ShowOutput = false
 	dokkuCmd.Execute()
 
@@ -29,6 +30,7 @@ func main() {
 		save = true
 	}
 
+	// check if all procs have limits
 	processes := resource.GetAppProcs(appName)
 	for procName, _ := range processes {
 		if _, ok := limits[procName]; !ok {
@@ -38,9 +40,17 @@ func main() {
 		}
 	}
 
-	common.LogInfo1(fmt.Sprintf("Resource limits"))
+	// remove non existing procs
+	for procName, _ := range limits {
+		if _, ok := processes[procName]; !ok {
+			delete(limits, procName)
+			save = true
+		}
+	}
+
+
 	for procName, _ := range processes {
-		common.LogInfo1(fmt.Sprintf("%s %s", procName, limit.FormatLimits(limits[procName])))
+		common.LogInfo1(fmt.Sprintf("%s limits: [%s]", procName, limit.FormatLimits(limits[procName])))
 	}
 
 	if save {

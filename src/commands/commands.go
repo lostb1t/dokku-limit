@@ -19,8 +19,8 @@ Additional commands:`
 	helpContent = `
     limit (<app>), Pretty-print app resource limits
     limit:set <app> <proc> [memory=VALUE cpu=VALUE] [--no-restart], Set one or more limits for app/process pair
-    limit:default Pretty-print default resource limits
-    limit:set-default [memory=VALUE cpu=VALUE], Set default resources. These will be used for new deploys.
+    limit:default, Pretty-print default resource limits
+    limit:set-default [memory=VALUE cpu=VALUE], Set default resource limits. These will be used for new apps/procs when no limits are set.
 `
 )
 

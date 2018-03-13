@@ -18,12 +18,8 @@ func CommandSet(args []string, noRestart bool) error {
 		common.LogWarn(fmt.Sprintf("WARNING: Process \"%s\" does not exists, setting anyway.", procName))
 	}
 
-	// Load current resource limits or initiate new.
+	// Load current resource limits
 	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		limits = resource.Limits{}
-	}
-
 	if limits[procName] == nil {
 		limits[procName] = resource.Defaults()
 	}
@@ -38,7 +34,7 @@ func CommandSet(args []string, noRestart bool) error {
 
 	limits.SaveToApp(appName)
 
-	common.LogInfo1("Limits set")
+	common.LogInfo1(fmt.Sprintf("limits set for process \"%s\"", procName))
 	common.LogVerbose(FormatLimits(limits[procName]))
 
 	if !noRestart {
@@ -57,27 +53,16 @@ func CommandReport(args []string) {
 	if len(args) == 1 {
 		appName := args[0]
 		verifyAppName(appName)
-		limits := resource.LoadForApp(appName)
-		if limits != nil {
-			apps[appName] = resource.LoadForApp(appName)
-		}
+		apps[appName] = resource.LoadForApp(appName)
 	} else {
 		appNames, _ := common.DokkuApps()
 		for _, appName := range appNames {
-			limits := resource.LoadForApp(appName)
-			if limits != nil {
-				apps[appName] = resource.LoadForApp(appName)
-			}
+			apps[appName] = resource.LoadForApp(appName)
 		}
-	}
-
-	if len(apps) == 0 {
-		fmt.Println("No limits set")
 	}
 
 	for appName, limits := range apps {
 		for procName, resources := range limits {
-			resource.SetDefaults(limits[procName])
 			common.LogInfo2(appName + " " + procName + " limits")
 			fmt.Println(formatLimitsTable(resources))
 		}

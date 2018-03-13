@@ -23,10 +23,6 @@ func main() {
 	procName := os.Args[3]
 
 	limits := resource.LoadForApp(appName)
-	if limits == nil {
-		fmt.Printf("%s", stdin)
-		return
-	}
 
 	resources, ok := limits[procName]
 	if !ok {

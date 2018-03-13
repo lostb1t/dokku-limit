@@ -37,11 +37,7 @@ func (r Resources) DockerOptions() []string {
 }
 
 func Defaults() Resources {
-	defaults := LoadDefaults()
-	if defaults == nil {
-		defaults = SystemDefaults()
-	}
-	return defaults
+	return LoadDefaults()
 }
 
 func SetDefaults(r Resources) {
@@ -165,7 +161,7 @@ func LoadForApp(appName string) Limits {
 	filePath := LimitFilePath(appName)
 
 	if !common.FileExists(filePath) {
-		return nil
+		return Limits{}
 	}
 
 	raw, err := ioutil.ReadFile(filePath)
@@ -187,7 +183,7 @@ func LoadDefaults() Resources {
 	resources := Resources{}
 
 	if !common.FileExists(filePath) {
-		return nil
+		return SystemDefaults()
 	}
 
 	raw, err := ioutil.ReadFile(filePath)

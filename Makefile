@@ -5,7 +5,7 @@ BUILD_IMAGE := golang:1.9.1
 
 GO_ARGS ?= -a
 
-SUBCOMMANDS = subcommands/set subcommands/set-default
+SUBCOMMANDS = subcommands/set subcommands/default subcommands/set-default
 
 build-in-docker: clean
 	docker run --rm \
@@ -29,7 +29,7 @@ hooks:
 	go build $(GO_ARGS) -o pre-deploy src/hooks/pre-deploy.go
 
 clean:
-	rm -rf commands subcommands docker-args-deploy
+	rm -rf commands subcommands docker-args-deploy pre-deploy
 
 src-clean:
 	rm -rf src Makefile
