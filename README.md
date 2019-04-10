@@ -1,4 +1,9 @@
-# dokku limit (beta)
+# DEPRECATED
+
+**Resource management is built into Dokku as of 0.15.0.
+See here for more details.**
+
+## dokku limit (beta)
 App resource management plugin for dokku.
 
 Currently supports setting limit's for memory and CPU per process type.
