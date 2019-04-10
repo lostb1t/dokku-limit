@@ -1,7 +1,7 @@
 # DEPRECATED
 
 **Resource management is built into Dokku as of 0.15.0.
-See here for more details.**
+See [here](http://dokku.viewdocs.io/dokku/advanced-usage/resource-management/) for more details.**
 
 ## dokku limit (beta)
 App resource management plugin for dokku.
